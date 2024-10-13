@@ -22,4 +22,10 @@
         android:name="com.sharc.ramdhd.ui.notifications.NotificationsFragment"
         android:label="@string/title_notifications"
         tools:layout="@layout/fragment_notifications" />
+
+    <fragment
+        android:id="@+id/navigation_timer"
+        android:name="com.sharc.ramdhd.ui.timer.TimerFragment"
+        android:label="Timer"
+        tools:layout="@layout/fragment_timer" />
 </navigation>

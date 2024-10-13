@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import com.sharc.ramdhd.R
 import com.sharc.ramdhd.databinding.FragmentHomeBinding
 
 class HomeFragment : Fragment() {
@@ -32,6 +34,12 @@ class HomeFragment : Fragment() {
         homeViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
+
+        // Set click listener for the image view
+        binding.myImageView.setOnClickListener {
+            findNavController().navigate(R.id.navigation_timer) // Navigate to the timer screen
+        }
+
         return root
     }
 
