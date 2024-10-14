@@ -19,7 +19,6 @@ class NavigationTest {
     @Test
     fun testNavigationToTimerPanel() {
         // Verify we're on the home screen
-//        onView(withId(R.id.navigation_home)).check(matches(isDisplayed()))
         onView(withId(R.id.my_image_view)).check(matches(isDisplayed()))
 
         // Click on the ImageView that navigates to the Timer panel
