@@ -24,9 +24,11 @@ import com.sharc.ramdhd.databinding.FragmentTimerBinding
 
 class TimerFragment : Fragment() {
     private var _binding: FragmentTimerBinding? = null
-    private val binding get() = _binding!!
     private val viewModel: TimerViewModel by viewModels()
 
+    // This property is only valid between onCreateView and
+    // onDestroyView.
+    private val binding get() = _binding!!
     private lateinit var notificationManager: NotificationManager
     private lateinit var vibrator: Vibrator
 
