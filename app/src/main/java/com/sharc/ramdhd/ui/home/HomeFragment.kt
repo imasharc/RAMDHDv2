@@ -37,6 +37,10 @@ class HomeFragment : Fragment() {
         binding.myImageView.setOnClickListener {
             findNavController().navigate(R.id.navigation_timer) // Navigate to the timer screen
         }
+        // Set click listener for the notes image navigating to Notes panel
+        binding.notesPanel.setOnClickListener {
+            findNavController().navigate(R.id.navigation_notes) // Navigate to the timer screen
+        }
 
         return root
     }

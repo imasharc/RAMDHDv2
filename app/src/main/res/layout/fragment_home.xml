@@ -33,4 +33,16 @@
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="0.238" />
 
+    <ImageView
+        android:id="@+id/notes_panel"
+        android:layout_width="168dp"
+        android:layout_height="168dp"
+        android:src="@drawable/undraw_add_notes_re_ln36"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintHorizontal_bias="0.934"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.237" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
