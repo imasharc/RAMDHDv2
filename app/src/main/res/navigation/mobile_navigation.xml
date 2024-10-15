@@ -5,33 +5,50 @@
     android:id="@+id/mobile_navigation"
     app:startDestination="@+id/navigation_home">
 
-    <fragment
-        android:id="@+id/navigation_home"
-        android:name="com.sharc.ramdhd.ui.home.HomeFragment"
-        android:label="@string/title_home"
-        tools:layout="@layout/fragment_home" />
+        <fragment
+            android:id="@+id/navigation_home"
+            android:name="com.sharc.ramdhd.ui.home.HomeFragment"
+            android:label="@string/title_home"
+            tools:layout="@layout/fragment_home" >
+                <action
+                    android:id="@+id/action_navigation_home_to_navigation_timer"
+                    app:destination="@id/navigation_timer"
+                    app:enterAnim="@anim/nav_default_enter_anim"
+                    app:exitAnim="@anim/nav_default_exit_anim"
+                    app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+                    app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+                <action
+                    android:id="@+id/action_navigation_home_to_navigation_notes"
+                    app:destination="@id/navigation_notes"
+                    app:enterAnim="@anim/nav_default_enter_anim"
+                    app:exitAnim="@anim/nav_default_exit_anim"
+                    app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+                    app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        </fragment>
 
-    <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.sharc.ramdhd.ui.dashboard.DashboardFragment"
-        android:label="@string/title_dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        <fragment
+            android:id="@+id/navigation_notifications"
+            android:name="com.sharc.ramdhd.ui.notifications.NotificationsFragment"
+            android:label="@string/title_notifications"
+            tools:layout="@layout/fragment_notifications" />
 
-    <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="com.sharc.ramdhd.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        <fragment
+            android:id="@+id/navigation_dashboard"
+            android:name="com.sharc.ramdhd.ui.dashboard.DashboardFragment"
+            android:label="@string/title_dashboard"
+            tools:layout="@layout/fragment_dashboard" />
 
-    <fragment
-        android:id="@+id/navigation_timer"
-        android:name="com.sharc.ramdhd.ui.timer.TimerFragment"
-        android:label="Timer"
-        tools:layout="@layout/fragment_timer" />
+        <fragment
+            android:id="@+id/navigation_timer"
+            android:name="com.sharc.ramdhd.ui.timer.TimerFragment"
+            android:label="Timer"
+            tools:layout="@layout/fragment_timer" />
 
-    <fragment
-        android:id="@+id/navigation_notes"
-        android:name="com.sharc.ramdhd.ui.home.notes.NotesFragment"
-        android:label="Notes"
-        tools:layout="@layout/fragment_notes" />
+        <fragment
+            android:id="@+id/navigation_notes"
+            android:name="com.sharc.ramdhd.ui.home.notes.NotesFragment"
+            android:label="Notes"
+            tools:layout="@layout/fragment_notes" >
+        </fragment>
+
 </navigation>
