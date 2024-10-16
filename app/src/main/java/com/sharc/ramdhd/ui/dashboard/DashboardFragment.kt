@@ -8,7 +8,6 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.sharc.ramdhd.databinding.FragmentDashboardBinding
-import com.sharc.ramdhd.ui.home.HomeViewModel
 
 class DashboardFragment : Fragment() {
 
