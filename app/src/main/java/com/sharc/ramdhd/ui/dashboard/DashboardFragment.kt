@@ -13,7 +13,7 @@ import com.sharc.ramdhd.ui.home.HomeViewModel
 class DashboardFragment : Fragment() {
 
     private var _binding: FragmentDashboardBinding? = null
-    private val dashboardViewModel: HomeViewModel by viewModels()
+    private val dashboardViewModel: DashboardViewModel by viewModels()
 
     // This property is only valid between onCreateView and
     // onDestroyView.
