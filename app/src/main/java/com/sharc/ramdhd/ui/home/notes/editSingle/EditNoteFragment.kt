@@ -1,43 +1,41 @@
 package com.sharc.ramdhd.ui.home.notes.editSingle
 
-import androidx.fragment.app.viewModels
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import com.sharc.ramdhd.R
+import androidx.navigation.fragment.findNavController
+import android.widget.Toast
+import androidx.lifecycle.ViewModelProvider
+import com.sharc.ramdhd.databinding.FragmentEditNoteBinding
 
 class EditNoteFragment : Fragment() {
-    companion object {
-        fun newInstance() = EditNoteFragment()
-    }
+    private var _binding: FragmentEditNoteBinding? = null
+    private val binding get() = _binding!!
+    private lateinit var viewModel: EditNoteViewModel
 
-    private val viewModel: EditNoteViewModel by viewModels()
-    private lateinit var editTextTitle: EditText
-    private lateinit var editTextDescription: EditText
-    private lateinit var buttonSave: Button
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return inflater.inflate(R.layout.fragment_edit_note, container, false)
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+        _binding = FragmentEditNoteBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        viewModel = ViewModelProvider(this)[EditNoteViewModel::class.java]
 
-        editTextTitle = view.findViewById(R.id.editTextTitle)
-        editTextDescription = view.findViewById(R.id.editTextDescription)
-        buttonSave = view.findViewById(R.id.buttonSave)
-
-        buttonSave.setOnClickListener {
-            val title = editTextTitle.text.toString()
-            val description = editTextDescription.text.toString()
+        binding.buttonSave.setOnClickListener {
+            val title = binding.editTextTitle.text.toString()
+            val description = binding.editTextDescription.text.toString()
             viewModel.saveNote(title, description)
+            Toast.makeText(context, "Note saved to RAMDHD database", Toast.LENGTH_SHORT).show()
+            // Navigate back to NotesFragment
+            findNavController().navigateUp()
         }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

@@ -1,14 +1,18 @@
 package com.sharc.ramdhd.ui.home.notes
 
+import NotesViewModel
 import androidx.fragment.app.viewModels
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.sharc.ramdhd.R
 import com.sharc.ramdhd.databinding.FragmentNotesBinding
+import kotlinx.coroutines.launch
 
 class NotesFragment : Fragment() {
 
@@ -32,7 +36,14 @@ class NotesFragment : Fragment() {
             findNavController().navigate(R.id.action_navigation_notes_to_navigation_edit_note)
         }
 
-        // TODO: Use the ViewModel
+        // Observe notes and log them
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.allNotes.collect { notes ->
+                notes.forEach { note ->
+                    Log.d("NotesFragment", "Note ${note.id}: ${note.title} - ${note.description} at ${note.timestamp}")
+                }
+            }
+        }
     }
 
     override fun onDestroyView() {
