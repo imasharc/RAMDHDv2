@@ -14,4 +14,8 @@ class NotesViewModel(application: Application) : AndroidViewModel(application) {
         repository = NoteRepository(noteDao)
         allNotes = repository.allNotes
     }
+
+    suspend fun deleteNotes(notes: List<Note>) {
+        repository.delete(notes)
+    }
 }

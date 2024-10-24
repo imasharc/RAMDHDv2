@@ -13,6 +13,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.sharc.ramdhd.R
 import com.sharc.ramdhd.databinding.FragmentNotesBinding
 import kotlinx.coroutines.launch
@@ -61,8 +62,13 @@ class NotesFragment : Fragment() {
             // Enter selection mode
             binding.myImageView.visibility = View.GONE
             binding.fabSelectAll.visibility = View.VISIBLE
+            binding.fabDelete.visibility = View.VISIBLE  // Show delete FAB
             isAllSelected = false
             binding.fabSelectAll.setImageResource(R.drawable.baseline_select_all_24)
+        }
+
+        binding.fabDelete.setOnClickListener {
+            showDeleteConfirmationDialog()
         }
 
         noteAdapter.setOnSelectionChangedListener { selectedCount ->
@@ -75,6 +81,31 @@ class NotesFragment : Fragment() {
                 if (isAllSelected) R.drawable.baseline_deselect_24
                 else R.drawable.baseline_select_all_24
             )
+        }
+    }
+
+    private fun showDeleteConfirmationDialog() {
+        val selectedNotes = noteAdapter.getSelectedNotes()
+        if (selectedNotes.isEmpty()) return
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Delete Notes")
+            .setMessage("Are you sure you want to delete ${selectedNotes.size} selected notes?")
+            .setPositiveButton("Delete") { dialog, _ ->
+                deleteSelectedNotes()
+                dialog.dismiss()
+            }
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun deleteSelectedNotes() {
+        val selectedNotes = noteAdapter.getSelectedNotes().toList()
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.deleteNotes(selectedNotes)
+            exitSelectionMode()
         }
     }
 
@@ -96,6 +127,7 @@ class NotesFragment : Fragment() {
         noteAdapter.toggleSelectionMode()
         binding.myImageView.visibility = View.VISIBLE
         binding.fabSelectAll.visibility = View.GONE
+        binding.fabDelete.visibility = View.GONE  // Hide delete FAB
     }
 
     private fun setupRecyclerView() {
