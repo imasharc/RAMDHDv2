@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback  // Add this import
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -21,6 +22,7 @@ class NotesFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: NotesViewModel by viewModels()
     private lateinit var noteAdapter: NoteAdapter
+    private var isAllSelected = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -32,13 +34,68 @@ class NotesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         setupRecyclerView()
         observeNotes()
+        setupListeners()
+        setupBackPressHandler()  // Add this line
+    }
 
+    private fun setupListeners() {
         binding.myImageView.setOnClickListener {
             findNavController().navigate(R.id.action_navigation_notes_to_navigation_edit_note)
         }
+
+        binding.fabSelectAll.setOnClickListener {
+            if (isAllSelected) {
+                noteAdapter.deselectAllNotes()
+                isAllSelected = false
+                binding.fabSelectAll.setImageResource(R.drawable.baseline_select_all_24)
+            } else {
+                noteAdapter.selectAllNotes()
+                isAllSelected = true
+                binding.fabSelectAll.setImageResource(R.drawable.baseline_deselect_24)
+            }
+        }
+
+        noteAdapter.setOnItemLongClickListener { note ->
+            // Enter selection mode
+            binding.myImageView.visibility = View.GONE
+            binding.fabSelectAll.visibility = View.VISIBLE
+            isAllSelected = false
+            binding.fabSelectAll.setImageResource(R.drawable.baseline_select_all_24)
+        }
+
+        noteAdapter.setOnSelectionChangedListener { selectedCount ->
+            if (selectedCount == 0 && noteAdapter.isInSelectionMode()) {
+                exitSelectionMode()
+            }
+            // Update select all button icon based on selection state
+            isAllSelected = noteAdapter.isAllSelected()
+            binding.fabSelectAll.setImageResource(
+                if (isAllSelected) R.drawable.baseline_deselect_24
+                else R.drawable.baseline_select_all_24
+            )
+        }
+    }
+
+    private fun setupBackPressHandler() {
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (noteAdapter.isInSelectionMode()) {
+                    exitSelectionMode()
+                } else {
+                    isEnabled = false
+                    requireActivity().onBackPressed()
+                }
+            }
+        }
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
+    }
+
+    private fun exitSelectionMode() {
+        noteAdapter.toggleSelectionMode()
+        binding.myImageView.visibility = View.VISIBLE
+        binding.fabSelectAll.visibility = View.GONE
     }
 
     private fun setupRecyclerView() {
@@ -46,7 +103,7 @@ class NotesFragment : Fragment() {
         binding.recyclerViewNotes.apply {
             adapter = noteAdapter
             layoutManager = LinearLayoutManager(requireContext())
-            setHasFixedSize(true)  // Optimize performance if items have fixed size
+            setHasFixedSize(true)
             itemAnimator = DefaultItemAnimator()
         }
     }
@@ -56,7 +113,6 @@ class NotesFragment : Fragment() {
             viewModel.allNotes.collect { notes ->
                 val sortedNotes = notes.sortedBy { it.timestamp }
                 noteAdapter.submitList(sortedNotes)
-
                 // Log notes for debugging
                 sortedNotes.forEach { note ->
                     Log.d("NotesFragment", "Note ${note.id}: ${note.title} - ${note.description} at ${note.timestamp}")

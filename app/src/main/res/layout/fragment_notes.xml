@@ -36,4 +36,22 @@
         app:elevation="6dp"
         app:rippleColor="@null" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabSelectAll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="70dp"
+        android:contentDescription="Select all notes"
+        android:visibility="gone"
+        app:srcCompat="@drawable/baseline_select_all_24"
+        app:fabCustomSize="70dp"
+        app:maxImageSize="50dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:backgroundTint="@android:color/white"
+        app:tint="@null"
+        app:elevation="6dp"
+        app:rippleColor="@null" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
