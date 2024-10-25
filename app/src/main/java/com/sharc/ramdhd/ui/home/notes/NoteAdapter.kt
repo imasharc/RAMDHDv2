@@ -14,9 +14,13 @@ import java.time.format.DateTimeFormatter
 class NoteAdapter : ListAdapter<Note, NoteAdapter.NoteViewHolder>(NoteDiffCallback()) {
     private var selectionMode = false
     private val selectedNotes = mutableSetOf<Note>()
-
+    private var onItemClickListener: ((Note) -> Unit)? = null
     private var onItemLongClickListener: ((Note) -> Unit)? = null
     private var onSelectionChanged: ((Int) -> Unit)? = null
+
+    fun setOnItemClickListener(listener: (Note) -> Unit) {
+        onItemClickListener = listener
+    }
 
     fun setOnItemLongClickListener(listener: (Note) -> Unit) {
         onItemLongClickListener = listener
@@ -64,6 +68,35 @@ class NoteAdapter : ListAdapter<Note, NoteAdapter.NoteViewHolder>(NoteDiffCallba
         val note = getItem(position)
         holder.bind(note, selectionMode, selectedNotes.contains(note))
 
+        // This sets up a click listener for the entire note item (CardView)
+        holder.itemView.setOnClickListener {
+            // First, check if we're in selection mode (multi-select mode)
+            if (selectionMode) {
+                // If we are in selection mode:
+                if (selectedNotes.contains(note)) {
+                    // If the note is already selected, unselect it
+                    selectedNotes.remove(note)
+                } else {
+                    // If the note isn't selected, select it
+                    selectedNotes.add(note)
+                }
+                // Update the visual appearance of just this item
+                notifyItemChanged(position)
+                /**
+                 * Notify the fragment about the change in selection count
+                 * This updates things like the "Select All" button state
+                 */
+                onSelectionChanged?.invoke(selectedNotes.size)
+            } else {
+                /**
+                 * If we're not in selection mode,
+                 * trigger the edit note action via the click listener
+                 * that was set in the fragment
+                 */
+                onItemClickListener?.invoke(note)
+            }
+        }
+
         holder.itemView.setOnLongClickListener {
             if (!selectionMode) {
                 onItemLongClickListener?.invoke(note)
@@ -73,18 +106,6 @@ class NoteAdapter : ListAdapter<Note, NoteAdapter.NoteViewHolder>(NoteDiffCallba
                 onSelectionChanged?.invoke(selectedNotes.size)
             }
             true
-        }
-
-        holder.itemView.setOnClickListener {
-            if (selectionMode) {
-                if (selectedNotes.contains(note)) {
-                    selectedNotes.remove(note)
-                } else {
-                    selectedNotes.add(note)
-                }
-                notifyItemChanged(position)
-                onSelectionChanged?.invoke(selectedNotes.size)
-            }
         }
     }
 

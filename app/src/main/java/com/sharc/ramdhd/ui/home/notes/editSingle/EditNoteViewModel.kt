@@ -13,19 +13,35 @@ import java.time.ZoneId
 
 class EditNoteViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: NoteRepository
+    private var currentNoteId: Int = -1
 
     init {
         val noteDao = AppDatabase.getDatabase(application).noteDao()
         repository = NoteRepository(noteDao)
     }
 
+    fun setNoteId(id: Int) {
+        currentNoteId = id
+    }
+
     fun saveNote(title: String, description: String) {
         viewModelScope.launch {
             val warsawTime = LocalDateTime.now(ZoneId.of("Europe/Warsaw"))
-            val note = Note(title = title, description = description, timestamp = warsawTime)
+            val note = if (currentNoteId != -1) {
+                Note(
+                    id = currentNoteId,
+                    title = title,
+                    description = description,
+                    timestamp = warsawTime
+                )
+            } else {
+                Note(
+                    title = title,
+                    description = description,
+                    timestamp = warsawTime
+                )
+            }
             repository.insert(note)
-
-            // Log the note info
             Log.d("EditNoteViewModel", "Note saved: $note")
         }
     }

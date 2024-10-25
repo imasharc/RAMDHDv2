@@ -63,6 +63,20 @@
             android:name="com.sharc.ramdhd.ui.home.notes.editSingle.EditNoteFragment"
             android:label="Edit Note"
             tools:layout="@layout/fragment_edit_note" >
+                <argument
+                    android:name="noteId"
+                    app:argType="integer"
+                    android:defaultValue="-1" />
+                <argument
+                    android:name="noteTitle"
+                    app:argType="string"
+                    app:nullable="true"
+                    android:defaultValue="@null" />
+                <argument
+                    android:name="noteDescription"
+                    app:argType="string"
+                    app:nullable="true"
+                    android:defaultValue="@null" />
         </fragment>
 
 </navigation>

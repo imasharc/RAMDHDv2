@@ -6,7 +6,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.OnBackPressedCallback  // Add this import
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -38,12 +38,30 @@ class NotesFragment : Fragment() {
         setupRecyclerView()
         observeNotes()
         setupListeners()
-        setupBackPressHandler()  // Add this line
+        setupBackPressHandler()
     }
 
     private fun setupListeners() {
+        // For creating new note
         binding.myImageView.setOnClickListener {
-            findNavController().navigate(R.id.action_navigation_notes_to_navigation_edit_note)
+            val action = NotesFragmentDirections.actionNavigationNotesToNavigationEditNote(
+                noteId = -1,
+                noteTitle = null,
+                noteDescription = null
+            )
+            findNavController().navigate(action)
+        }
+
+        // For editing existing notes
+        noteAdapter.setOnItemClickListener { note ->
+            if (!noteAdapter.isInSelectionMode()) {
+                val action = NotesFragmentDirections.actionNavigationNotesToNavigationEditNote(
+                    noteId = note.id,
+                    noteTitle = note.title,
+                    noteDescription = note.description
+                )
+                findNavController().navigate(action)
+            }
         }
 
         binding.fabSelectAll.setOnClickListener {
@@ -143,7 +161,7 @@ class NotesFragment : Fragment() {
     private fun observeNotes() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.allNotes.collect { notes ->
-                val sortedNotes = notes.sortedBy { it.timestamp }
+                val sortedNotes = notes.sortedByDescending { it.timestamp }  // Changed to sortByDescending
                 noteAdapter.submitList(sortedNotes)
                 // Log notes for debugging
                 sortedNotes.forEach { note ->
