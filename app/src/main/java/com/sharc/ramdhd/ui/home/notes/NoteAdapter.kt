@@ -146,6 +146,10 @@ class NoteAdapter : ListAdapter<Note, NoteAdapter.NoteViewHolder>(NoteDiffCallba
                 // Update checkbox state
                 checkBoxNote.isChecked = isSelected
                 root.isActivated = isSelected
+
+                // Disable checkbox's own click listener and make it non-clickable
+                checkBoxNote.isClickable = false
+                checkBoxNote.isFocusable = false
             }
         }
     }
