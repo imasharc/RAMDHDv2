@@ -6,43 +6,68 @@
     android:layout_height="match_parent"
     tools:context=".ui.home.HomeFragment">
 
-    <TextView
-        android:id="@+id/text_home"
-        android:layout_width="match_parent"
+    <!-- First Panel Container -->
+    <LinearLayout
+        android:id="@+id/timer_panel"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:clickable="true"
+        android:focusable="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <!-- Add your ImageView here -->
-    <ImageView
-        android:id="@+id/my_image_view"
-        android:layout_width="168dp"
-        android:layout_height="168dp"
-        android:src="@drawable/undraw_time_management_re_tk5w"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.065"
+        app:layout_constraintHorizontal_bias="0.1"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.238" />
+        app:layout_constraintVertical_bias="0.25">
 
-    <ImageView
-        android:id="@+id/notes_panel"
-        android:layout_width="168dp"
-        android:layout_height="168dp"
-        android:src="@drawable/undraw_add_notes_re_ln36"
+        <ImageView
+            android:id="@+id/my_image_view"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:src="@drawable/undraw_time_management_re_tk5w"/>
+
+        <TextView
+            android:id="@+id/timer_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="TIMER"
+            android:textSize="16sp"
+            android:textStyle="bold"/>
+    </LinearLayout>
+
+    <!-- Second Panel Container -->
+    <LinearLayout
+        android:id="@+id/notes_panel_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:clickable="true"
+        android:focusable="true"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.934"
+        app:layout_constraintHorizontal_bias="0.9"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.237" />
+        app:layout_constraintVertical_bias="0.25">
+
+        <ImageView
+            android:id="@+id/notes_panel"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:src="@drawable/undraw_add_notes_re_ln36"/>
+
+        <TextView
+            android:id="@+id/notes_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="NOTES"
+            android:textSize="16sp"
+            android:textStyle="bold"/>
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

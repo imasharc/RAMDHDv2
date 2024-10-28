@@ -8,7 +8,7 @@
         <fragment
             android:id="@+id/navigation_home"
             android:name="com.sharc.ramdhd.ui.home.HomeFragment"
-            android:label="@string/title_home"
+            android:label="Attention"
             tools:layout="@layout/fragment_home" >
                 <action
                     android:id="@+id/action_navigation_home_to_navigation_timer"
@@ -29,13 +29,13 @@
         <fragment
             android:id="@+id/navigation_notifications"
             android:name="com.sharc.ramdhd.ui.notifications.NotificationsFragment"
-            android:label="@string/title_notifications"
+            android:label="People"
             tools:layout="@layout/fragment_notifications" />
 
         <fragment
             android:id="@+id/navigation_dashboard"
             android:name="com.sharc.ramdhd.ui.dashboard.DashboardFragment"
-            android:label="@string/title_dashboard"
+            android:label="Organization"
             tools:layout="@layout/fragment_dashboard" />
 
         <fragment
