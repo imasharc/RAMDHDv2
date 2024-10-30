@@ -29,7 +29,7 @@ class DashboardFragment : Fragment() {
 
         // Set click listener for the routine menu panel
         binding.routineMenuPanel.setOnClickListener {
-            findNavController().navigate(R.id.action_navigation_dashboard_to_navigation_navigation_routine_menu)
+            findNavController().navigate(R.id.action_navigation_dashboard_to_navigation_routine_menu)
         }
         return root
     }
