@@ -14,6 +14,7 @@ import android.widget.LinearLayout
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 class EditRoutineFragment : Fragment() {
     companion object {
@@ -56,6 +57,16 @@ class EditRoutineFragment : Fragment() {
                 descriptionInput.text.toString()
             )
             Log.d(TAG, "Routine Data: $routineData")
+
+            // Show confirmation dialog
+            MaterialAlertDialogBuilder(requireContext())
+                .setTitle("Saved routine")
+                .setMessage(routineData)
+                .setPositiveButton("OK") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show()
+
             // Pop the fragment
             requireActivity().supportFragmentManager.popBackStack()
         }
