@@ -14,7 +14,10 @@ import android.widget.LinearLayout
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
+import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.sharc.ramdhd.data.model.RoutineWithSteps
+import kotlinx.coroutines.launch
 
 class EditRoutineFragment : Fragment() {
     companion object {
@@ -50,25 +53,52 @@ class EditRoutineFragment : Fragment() {
         titleInput.requestFocus()
         showKeyboardFor(titleInput)
 
-        // Log the routine data after clicking "Save" button
+        // Save button click handler
         view.findViewById<View>(R.id.saveButton).setOnClickListener {
-            val routineData = viewModel.getRoutineData(
-                titleInput.text.toString(),
-                descriptionInput.text.toString()
-            )
-            Log.d(TAG, "Routine Data: $routineData")
+            val title = titleInput.text.toString()
+            val description = descriptionInput.text.toString()
 
-            // Show confirmation dialog
-            MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Saved routine")
-                .setMessage(routineData)
-                .setPositiveButton("OK") { dialog, _ ->
-                    dialog.dismiss()
+            // Launch coroutine to save routine
+            lifecycleScope.launch {
+                try {
+                    val savedRoutine = viewModel.saveRoutine(title, description)
+
+                    // Log all existing routines
+                    viewModel.logAllRoutines()
+
+                    // Store the Activity reference before popping
+                    val activity = requireActivity()
+                    // Pop back to Routine menu first
+                    activity.supportFragmentManager.popBackStack()
+
+                    // Show dialog in the Activity context
+                    MaterialAlertDialogBuilder(activity)
+                        .setTitle("Routine Saved Successfully")
+                        .setMessage(buildRoutineMessage(savedRoutine))
+                        .setPositiveButton("OK", null)
+                        .show()
+                } catch (e: Exception) {
+                    // Show error in current context if we're still attached
+                    if (isAdded) {
+                        MaterialAlertDialogBuilder(requireContext())
+                            .setTitle("Error Saving Routine")
+                            .setMessage("An error occurred: ${e.localizedMessage}")
+                            .setPositiveButton("OK", null)
+                            .show()
+                    }
                 }
-                .show()
+            }
+        }
+    }
 
-            // Pop the fragment
-            requireActivity().supportFragmentManager.popBackStack()
+    private fun buildRoutineMessage(routineWithSteps: RoutineWithSteps): String {
+        return buildString {
+            append("Title: ${routineWithSteps.routine.title}\n")
+            append("Description: ${routineWithSteps.routine.description}\n")
+            append("Steps:\n")
+            routineWithSteps.steps.forEachIndexed { index, step ->
+                append("${index + 1}. ${step.description}\n")
+            }
         }
     }
 

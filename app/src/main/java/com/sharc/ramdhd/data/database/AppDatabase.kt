@@ -3,14 +3,18 @@ package com.sharc.ramdhd.data.database
 import android.content.Context
 import androidx.room.*
 import com.sharc.ramdhd.data.dao.NoteDao
+import com.sharc.ramdhd.data.dao.RoutineDao
 import com.sharc.ramdhd.data.model.Note
+import com.sharc.ramdhd.data.model.Routine
+import com.sharc.ramdhd.data.model.Step
 import java.time.LocalDateTime
 import java.time.ZoneId
 
-@Database(entities = [Note::class], version = 2, exportSchema = false)
+@Database(entities = [Note::class, Routine::class, Step::class], version = 3, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun noteDao(): NoteDao
+    abstract fun routineDao(): RoutineDao
 
     companion object {
         @Volatile
@@ -22,7 +26,10 @@ abstract class AppDatabase : RoomDatabase() {
                     context.applicationContext,
                     AppDatabase::class.java,
                     "RAMDHD.db"
-                ).build()
+                )
+                    .fallbackToDestructiveMigration() // This will recreate tables if version changes
+                    // For production, you should implement proper migration instead
+                    .build()
                 INSTANCE = instance
                 instance
             }
