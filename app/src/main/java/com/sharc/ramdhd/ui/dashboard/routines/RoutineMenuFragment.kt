@@ -57,6 +57,18 @@ class RoutineMenuFragment : Fragment(R.layout.fragment_routine_menu) {
             }
         }
 
+        routineAdapter.setOnItemClickListener { routineWithSteps ->
+            if (!routineAdapter.isInSelectionMode()) {
+                val action = RoutineMenuFragmentDirections
+                    .actionNavigationRoutineMenuToNavigationViewSingleRoutine(
+                        routineId = routineWithSteps.routine.id,
+                        routineTitle = routineWithSteps.routine.title,
+                        routineDescription = routineWithSteps.routine.description
+                    )
+                findNavController().navigate(action)
+            }
+        }
+
         routineAdapter.setOnItemLongClickListener { routine ->
             // Enter selection mode
             binding.myImageView.visibility = View.GONE

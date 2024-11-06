@@ -12,6 +12,10 @@ interface RoutineDao {
     @Query("SELECT * FROM routines")
     fun getAllRoutinesWithSteps(): Flow<List<RoutineWithSteps>>
 
+    @Transaction
+    @Query("SELECT * FROM routines WHERE id = :routineId")
+    fun getRoutineWithSteps(routineId: Int): Flow<RoutineWithSteps?>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertRoutine(routine: Routine): Long
 

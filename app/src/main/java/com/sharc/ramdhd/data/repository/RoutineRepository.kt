@@ -10,6 +10,10 @@ import java.time.LocalDateTime
 class RoutineRepository(private val routineDao: RoutineDao) {
     val allRoutines: Flow<List<RoutineWithSteps>> = routineDao.getAllRoutinesWithSteps()
 
+    fun getRoutineWithSteps(routineId: Int): Flow<RoutineWithSteps?> {
+        return routineDao.getRoutineWithSteps(routineId)
+    }
+
     suspend fun insert(routine: Routine, steps: List<Step>) {
         routineDao.insertRoutineWithSteps(routine, steps)
     }
