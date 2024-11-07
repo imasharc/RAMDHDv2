@@ -29,10 +29,8 @@ class StepAdapter : ListAdapter<Step, StepAdapter.StepViewHolder>(StepDiffCallba
         holder.bind(step, step.isChecked) { isChecked ->
             // Update the model
             getItem(position).isChecked = isChecked
-
             // Notify listeners
             onStepCheckedListener?.invoke(step.id, isChecked)
-
             // Check completion state
             checkCompletionState()
         }
@@ -41,7 +39,6 @@ class StepAdapter : ListAdapter<Step, StepAdapter.StepViewHolder>(StepDiffCallba
     private fun checkCompletionState() {
         val allChecked = currentList.all { it.isChecked }
         Log.d("StepAdapter", "Checking completion state: allChecked=$allChecked")
-
         if (allChecked && currentList.isNotEmpty()) {
             Log.d("StepAdapter", "All steps are checked")
             onAllStepsCheckedListener?.invoke()
@@ -65,20 +62,26 @@ class StepAdapter : ListAdapter<Step, StepAdapter.StepViewHolder>(StepDiffCallba
 
     class StepViewHolder(private val binding: ItemRoutineStepBinding) :
         RecyclerView.ViewHolder(binding.root) {
-
         fun bind(step: Step, isChecked: Boolean, onCheckChanged: (Boolean) -> Unit) {
             binding.apply {
                 textViewStepDescription.text = step.description
 
-                // Remove the listener before setting checked state
+                // Remove previous listeners
                 checkBoxStep.setOnCheckedChangeListener(null)
+                root.setOnClickListener(null)
 
                 // Set the checked state
                 checkBoxStep.isChecked = isChecked
 
-                // Set the new listener
-                checkBoxStep.setOnCheckedChangeListener { _, checked ->
-                    onCheckChanged(checked)
+                // Make the checkbox non-clickable
+                checkBoxStep.isClickable = false
+                checkBoxStep.isFocusable = false
+
+                // Set click listener on the entire view
+                root.setOnClickListener {
+                    val newState = !checkBoxStep.isChecked
+                    checkBoxStep.isChecked = newState
+                    onCheckChanged(newState)
                 }
             }
         }
@@ -96,7 +99,6 @@ class StepAdapter : ListAdapter<Step, StepAdapter.StepViewHolder>(StepDiffCallba
 
     override fun submitList(list: List<Step>?) {
         super.submitList(list?.map { it.copy() })
-
         // Check initial completion state after submitting the list
         if (list != null) {
             checkCompletionState()
