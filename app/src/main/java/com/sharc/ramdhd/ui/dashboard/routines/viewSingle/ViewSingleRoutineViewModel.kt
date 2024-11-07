@@ -25,4 +25,33 @@ class ViewSingleRoutineViewModel(private val repository: RoutineRepository) : Vi
             }
         }
     }
+
+    fun updateStepCheckedState(stepId: Int, isChecked: Boolean) {
+        viewModelScope.launch {
+            repository.updateStepCheckedState(stepId, isChecked)
+        }
+    }
+
+    suspend fun checkRoutineCompletion(routineId: Int): Boolean {
+        return repository.areAllStepsChecked(routineId)
+    }
+
+
+    fun markRoutineAsCompleted(routineId: Int) {
+        viewModelScope.launch {
+            repository.markRoutineAsCompleted(routineId)
+        }
+    }
+
+    fun markRoutineAsNotCompleted(routineId: Int) {
+        viewModelScope.launch {
+            repository.markRoutineAsNotCompleted(routineId)
+        }
+    }
+
+    fun resetRoutine(routineId: Int) {
+        viewModelScope.launch {
+            repository.resetRoutine(routineId)
+        }
+    }
 }

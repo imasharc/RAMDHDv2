@@ -3,6 +3,7 @@ package com.sharc.ramdhd.ui.dashboard.routines
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.graphics.Paint
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -103,6 +104,18 @@ class RoutineAdapter : ListAdapter<RoutineWithSteps, RoutineAdapter.RoutineViewH
         fun bind(routineWithSteps: RoutineWithSteps, isSelectionMode: Boolean, isSelected: Boolean) {
             binding.apply {
                 textViewRoutineTitle.text = routineWithSteps.routine.title
+
+                // Handle completed state
+                if (routineWithSteps.routine.isCompleted) {
+                    root.setBackgroundResource(android.R.color.holo_green_light)
+                    textViewRoutineTitle.paintFlags = textViewRoutineTitle.paintFlags or
+                            Paint.STRIKE_THRU_TEXT_FLAG
+                } else {
+                    root.setBackgroundResource(android.R.color.white)
+                    textViewRoutineTitle.paintFlags = textViewRoutineTitle.paintFlags and
+                            Paint.STRIKE_THRU_TEXT_FLAG.inv()
+                }
+
                 try {
                     val dateTime = LocalDateTime.parse(
                         routineWithSteps.routine.timestamp.toString(),

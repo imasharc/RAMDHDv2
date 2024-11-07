@@ -10,7 +10,7 @@ import com.sharc.ramdhd.data.model.Step
 import java.time.LocalDateTime
 import java.time.ZoneId
 
-@Database(entities = [Note::class, Routine::class, Step::class], version = 3, exportSchema = false)
+@Database(entities = [Note::class, Routine::class, Step::class], version = 5, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun noteDao(): NoteDao

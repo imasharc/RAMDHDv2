@@ -22,6 +22,35 @@ class RoutineRepository(private val routineDao: RoutineDao) {
         routineDao.updateRoutine(routine)
     }
 
+    suspend fun updateStepCheckedState(stepId: Int, isChecked: Boolean) {
+        routineDao.updateStepCheckedState(stepId, isChecked)
+    }
+
+    suspend fun areAllStepsChecked(routineId: Int): Boolean {
+        val checkedCount = routineDao.getCheckedStepsCount(routineId)
+        val totalCount = routineDao.getTotalStepsCount(routineId)
+        return checkedCount == totalCount && totalCount > 0
+    }
+
+    suspend fun resetRoutineSteps(routineId: Int) {
+        routineDao.resetRoutineSteps(routineId)
+    }
+
+    suspend fun markRoutineAsCompleted(routineId: Int) {
+        routineDao.markRoutineAsCompleted(routineId)
+    }
+
+    suspend fun markRoutineAsNotCompleted(routineId: Int) {
+        routineDao.markRoutineAsNotCompleted(routineId)
+    }
+
+    suspend fun resetRoutine(routineId: Int) {
+        // Reset all steps to unchecked
+        routineDao.resetRoutineSteps(routineId)
+        // Mark routine as not completed
+        routineDao.markRoutineAsNotCompleted(routineId)
+    }
+
     suspend fun delete(routines: List<Routine>) {
         routineDao.deleteRoutines(routines)
     }

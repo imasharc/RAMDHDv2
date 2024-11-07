@@ -21,5 +21,6 @@ data class Step(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val routineId: Int,
     val orderNumber: Int,
-    val description: String
+    val description: String,
+    var isChecked: Boolean = false
 )

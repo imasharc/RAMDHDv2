@@ -32,6 +32,24 @@ interface RoutineDao {
     @Update
     suspend fun updateRoutine(routine: Routine)
 
+    @Query("UPDATE routines SET isCompleted = 1 WHERE id = :routineId")
+    suspend fun markRoutineAsCompleted(routineId: Int)
+
+    @Query("UPDATE steps SET isChecked = :isChecked WHERE id = :stepId")
+    suspend fun updateStepCheckedState(stepId: Int, isChecked: Boolean)
+
+    @Query("SELECT COUNT(*) FROM steps WHERE routineId = :routineId AND isChecked = 1")
+    suspend fun getCheckedStepsCount(routineId: Int): Int
+
+    @Query("SELECT COUNT(*) FROM steps WHERE routineId = :routineId")
+    suspend fun getTotalStepsCount(routineId: Int): Int
+
+    @Query("UPDATE steps SET isChecked = 0 WHERE routineId = :routineId")
+    suspend fun resetRoutineSteps(routineId: Int)
+
+    @Query("UPDATE routines SET isCompleted = 0 WHERE id = :routineId")
+    suspend fun markRoutineAsNotCompleted(routineId: Int)
+
     @Delete
     suspend fun deleteRoutines(routines: List<Routine>)
 }
