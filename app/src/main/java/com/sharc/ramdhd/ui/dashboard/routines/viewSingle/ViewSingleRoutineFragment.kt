@@ -1,5 +1,6 @@
 package com.sharc.ramdhd.ui.dashboard.routines.viewSingle
 
+import android.content.ContentValues.TAG
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -107,22 +108,28 @@ class ViewSingleRoutineFragment : Fragment(R.layout.fragment_view_single_routine
             }
         }
     }
-
     private fun setupEditFab() {
         binding.fabEdit.setOnClickListener {
             try {
-                // Use the current routine data to navigate to edit screen
                 viewModel.routine.value?.let { routineWithSteps ->
+                    val steps = routineWithSteps.steps
+                        .sortedBy { it.orderNumber }
+                        .map { it.description }
+                        .toTypedArray()
+
+                    Log.d(TAG, "Navigating to edit with steps: ${steps.joinToString()}")
+
                     val action = ViewSingleRoutineFragmentDirections
                         .actionNavigationViewSingleRoutineToNavigationEditRoutine(
                             routineId = routineWithSteps.routine.id,
                             routineTitle = routineWithSteps.routine.title,
-                            routineDescription = routineWithSteps.routine.description
+                            routineDescription = routineWithSteps.routine.description,
+                            steps = steps
                         )
                     findNavController().navigate(action)
                 }
             } catch (e: Exception) {
-                Log.e("ViewSingleRoutineFragment", "Error navigating to edit screen", e)
+                Log.e(TAG, "Error navigating to edit screen", e)
             }
         }
     }

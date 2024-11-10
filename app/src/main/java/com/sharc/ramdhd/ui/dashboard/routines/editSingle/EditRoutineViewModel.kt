@@ -15,7 +15,6 @@ import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
 class EditRoutineViewModel(application: Application) : AndroidViewModel(application) {
-
     companion object {
         private const val TAG = "EditRoutineViewModel"
         private const val MIN_STEPS = 3
@@ -24,63 +23,28 @@ class EditRoutineViewModel(application: Application) : AndroidViewModel(applicat
     private val _steps = MutableLiveData<MutableList<String>>()
     private val repository: RoutineRepository
     private var routineId: Int = -1
-    private var existingRoutine: Routine? = null
     private var currentSteps = MutableList(MIN_STEPS) { "" }
 
     init {
         Log.d(TAG, "Initializing EditRoutineViewModel")
         val database = AppDatabase.getDatabase(getApplication<Application>())
         repository = RoutineRepository(database.routineDao())
-        // Don't set initial empty steps here
     }
 
     fun getSteps(): LiveData<MutableList<String>> = _steps
 
-    fun loadRoutine(routineId: Int) {
-        this.routineId = routineId
-        Log.d(TAG, "Loading routine with ID: $routineId")
-
-        viewModelScope.launch {
-            try {
-                repository.getRoutineWithStepsOnce(routineId)?.let { routineWithSteps ->
-                    Log.d(TAG, """
-                        Loaded routine data:
-                        Title: ${routineWithSteps.routine.title}
-                        Description: ${routineWithSteps.routine.description}
-                        Steps count: ${routineWithSteps.steps.size}
-                    """.trimIndent())
-
-                    // Convert steps to list of strings and sort by order
-                    currentSteps = routineWithSteps.steps
-                        .sortedBy { it.orderNumber }
-                        .map { it.description }
-                        .toMutableList()
-
-                    Log.d(TAG, "Sorted steps: ${
-                        currentSteps.mapIndexed { index, text ->
-                            "\n  $index: $text"
-                        }
-                    }")
-
-                    // Ensure minimum number of steps
-                    while (currentSteps.size < MIN_STEPS) {
-                        currentSteps.add("")
-                    }
-
-                    // Update LiveData with the loaded steps
-                    _steps.postValue(currentSteps)
-                    Log.d(TAG, "Posted steps to LiveData: ${currentSteps.joinToString(", ")}")
-                } ?: run {
-                    Log.w(TAG, "No routine found with ID: $routineId")
-                    // Initialize with empty steps if no routine found
-                    _steps.postValue(MutableList(MIN_STEPS) { "" })
+    fun initializeSteps(steps: Array<String>?) {
+        Log.d(TAG, "Initializing steps: ${steps?.joinToString()}")
+        currentSteps = if (steps != null) {
+            steps.toMutableList().also {
+                while (it.size < MIN_STEPS) {
+                    it.add("")
                 }
-            } catch (e: Exception) {
-                Log.e(TAG, "Error loading routine: ${e.message}", e)
-                // Initialize with empty steps on error
-                _steps.postValue(MutableList(MIN_STEPS) { "" })
             }
+        } else {
+            MutableList(MIN_STEPS) { "" }
         }
+        _steps.value = currentSteps
     }
 
     fun updateStep(index: Int, text: String) {
@@ -96,23 +60,13 @@ class EditRoutineViewModel(application: Application) : AndroidViewModel(applicat
             }
 
             _steps.value = currentSteps.toMutableList()
-            Log.d(TAG, "Current steps after update: ${
-                currentSteps.mapIndexed { i, t ->
-                    "\n  $i: $t"
-                }
-            }")
         } catch (e: Exception) {
             Log.e(TAG, "Error updating step: ${e.message}", e)
         }
     }
 
     suspend fun saveRoutine(title: String, description: String): RoutineWithSteps {
-        Log.d(TAG, """
-            Saving routine:
-            ID: $routineId
-            Title: $title
-            Description: $description
-        """.trimIndent())
+        Log.d(TAG, "Saving routine: $title")
 
         try {
             // Find the last index with non-empty text
@@ -130,15 +84,8 @@ class EditRoutineViewModel(application: Application) : AndroidViewModel(applicat
                 )
             }
 
-            Log.d(TAG, "Steps to save (including empty ones): ${
-                stepsToSave.mapIndexed { index, step ->
-                    "\n  $index: ${step.description}"
-                }
-            }")
-
             return if (routineId != -1) {
                 // Update existing routine
-                Log.d(TAG, "Updating existing routine with ID: $routineId")
                 val updatedRoutine = Routine(
                     id = routineId,
                     title = title,
@@ -150,7 +97,6 @@ class EditRoutineViewModel(application: Application) : AndroidViewModel(applicat
                 RoutineWithSteps(updatedRoutine, stepsToSave)
             } else {
                 // Create new routine
-                Log.d(TAG, "Creating new routine")
                 val newRoutine = Routine(
                     title = title,
                     description = description,
@@ -166,5 +112,9 @@ class EditRoutineViewModel(application: Application) : AndroidViewModel(applicat
             Log.e(TAG, "Error saving routine: ${e.message}", e)
             throw e
         }
+    }
+
+    fun setRoutineId(id: Int) {
+        this.routineId = id
     }
 }

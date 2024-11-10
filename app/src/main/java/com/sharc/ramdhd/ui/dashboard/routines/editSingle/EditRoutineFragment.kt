@@ -81,14 +81,11 @@ class EditRoutineFragment : Fragment() {
     }
 
     private fun loadInitialData() {
-        if (args.routineId != -1) {
-            Log.d(TAG, "Loading existing routine with ID: ${args.routineId}")
-            viewModel.loadRoutine(args.routineId)
-        } else {
-            Log.d(TAG, "Initializing new routine with $MIN_STEPS steps")
-            for (i in 0 until MIN_STEPS) {
-                addStepField(i)
-            }
+        Log.d(TAG, "Loading initial data, routineId: ${args.routineId}")
+        viewModel.setRoutineId(args.routineId)
+        viewModel.initializeSteps(args.steps)
+
+        if (args.routineId == -1) {
             titleInput.requestFocus()
             showKeyboardFor(titleInput)
         }
