@@ -81,13 +81,33 @@
                 <argument
                     android:name="routineDescription"
                     app:argType="string" />
+                <action
+                    android:id="@+id/action_navigation_view_single_routine_to_navigation_edit_routine"
+                    app:destination="@id/navigation_edit_routine"
+                    app:enterAnim="@anim/nav_default_enter_anim"
+                    app:exitAnim="@anim/nav_default_exit_anim"
+                    app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+                    app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         </fragment>
 
         <fragment
             android:id="@+id/navigation_edit_routine"
             android:name="com.sharc.ramdhd.ui.dashboard.routines.editSingle.EditRoutineFragment"
             android:label="Edit routine"
-            tools:layout="@layout/fragment_edit_routine" />
+            tools:layout="@layout/fragment_edit_routine">
+                <argument
+                    android:name="routineId"
+                    app:argType="integer"
+                    android:defaultValue="-1" />
+                <argument
+                    android:name="routineTitle"
+                    app:argType="string"
+                    android:defaultValue=""/>
+                <argument
+                    android:name="routineDescription"
+                    app:argType="string"
+                    android:defaultValue=""/>
+        </fragment>
 
         <fragment
             android:id="@+id/navigation_timer"

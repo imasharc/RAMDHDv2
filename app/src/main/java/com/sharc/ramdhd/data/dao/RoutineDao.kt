@@ -14,7 +14,11 @@ interface RoutineDao {
 
     @Transaction
     @Query("SELECT * FROM routines WHERE id = :routineId")
-    fun getRoutineWithSteps(routineId: Int): Flow<RoutineWithSteps?>
+    suspend fun getRoutineWithSteps(routineId: Int): RoutineWithSteps?
+
+    @Transaction
+    @Query("SELECT * FROM routines WHERE id = :routineId")
+    suspend fun getRoutineWithStepsOnce(routineId: Int): RoutineWithSteps?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertRoutine(routine: Routine): Long
@@ -38,6 +42,15 @@ interface RoutineDao {
     @Query("UPDATE steps SET isChecked = :isChecked WHERE id = :stepId")
     suspend fun updateStepCheckedState(stepId: Int, isChecked: Boolean)
 
+    @Transaction
+    suspend fun updateRoutineWithSteps(routine: Routine, newSteps: List<Step>) {
+        updateRoutine(routine)
+        // Delete existing steps
+        deleteStepsForRoutine(routine.id)
+        // Insert new steps
+        insertSteps(newSteps)
+    }
+
     @Query("SELECT COUNT(*) FROM steps WHERE routineId = :routineId AND isChecked = 1")
     suspend fun getCheckedStepsCount(routineId: Int): Int
 
@@ -52,4 +65,7 @@ interface RoutineDao {
 
     @Delete
     suspend fun deleteRoutines(routines: List<Routine>)
+
+    @Query("DELETE FROM steps WHERE routineId = :routineId")
+    suspend fun deleteStepsForRoutine(routineId: Int)
 }

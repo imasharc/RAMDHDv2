@@ -6,8 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:paddingTop="16dp"
-    android:paddingHorizontal="16dp"
-    android:paddingBottom="80dp">
+    android:paddingHorizontal="16dp">
 
     <TextView
         android:id="@+id/textViewTitle"
@@ -43,5 +42,22 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         tools:listitem="@layout/item_routine_step"/>
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fabEdit"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="70dp"
+        android:contentDescription="Edit routine"
+        app:srcCompat="@drawable/edit_pencil"
+        app:fabCustomSize="70dp"
+        app:maxImageSize="40dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:backgroundTint="@android:color/white"
+        app:tint="#2196F3"
+        app:elevation="6dp"
+        app:rippleColor="@null" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

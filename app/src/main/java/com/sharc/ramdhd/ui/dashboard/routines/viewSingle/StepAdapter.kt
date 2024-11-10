@@ -29,14 +29,12 @@ class StepAdapter : ListAdapter<Step, StepAdapter.StepViewHolder>(StepDiffCallba
         holder.bind(step, step.isChecked) { isChecked ->
             // Update the model
             getItem(position).isChecked = isChecked
-            // Notify listeners
+            // Notify listeners and let them handle the state check
             onStepCheckedListener?.invoke(step.id, isChecked)
-            // Check completion state
-            checkCompletionState()
         }
     }
 
-    private fun checkCompletionState() {
+    fun checkCompletionState() {
         val allChecked = currentList.all { it.isChecked }
         Log.d("StepAdapter", "Checking completion state: allChecked=$allChecked")
         if (allChecked && currentList.isNotEmpty()) {
@@ -99,9 +97,7 @@ class StepAdapter : ListAdapter<Step, StepAdapter.StepViewHolder>(StepDiffCallba
 
     override fun submitList(list: List<Step>?) {
         super.submitList(list?.map { it.copy() })
-        // Check initial completion state after submitting the list
-        if (list != null) {
-            checkCompletionState()
-        }
+        // Check completion state after submitting new list
+        list?.let { checkCompletionState() }
     }
 }

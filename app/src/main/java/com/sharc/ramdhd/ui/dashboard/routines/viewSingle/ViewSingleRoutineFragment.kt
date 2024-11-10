@@ -38,6 +38,7 @@ class ViewSingleRoutineFragment : Fragment(R.layout.fragment_view_single_routine
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentViewSingleRoutineBinding.bind(view)
         setupRecyclerView()
+        setupEditFab()
         loadRoutineData()
         observeRoutineData()
     }
@@ -46,7 +47,17 @@ class ViewSingleRoutineFragment : Fragment(R.layout.fragment_view_single_routine
         stepAdapter = StepAdapter().apply {
             setOnStepCheckedListener { stepId, isChecked ->
                 if (isAdded && !completionDialogShowing && !isResetting) {
-                    viewModel.updateStepCheckedState(stepId, isChecked)
+                    viewModel.handleStepStateChange(
+                        stepId = stepId,
+                        isChecked = isChecked,
+                        routineId = args.routineId
+                    ) { isCompleted ->
+                        if (isCompleted) {
+                            stepAdapter.checkCompletionState()
+                        } else {
+                            viewModel.markRoutineAsNotCompleted(args.routineId)
+                        }
+                    }
                 }
             }
 
@@ -93,6 +104,25 @@ class ViewSingleRoutineFragment : Fragment(R.layout.fragment_view_single_routine
                         stepAdapter.submitList(sortedSteps)
                     }
                 }
+            }
+        }
+    }
+
+    private fun setupEditFab() {
+        binding.fabEdit.setOnClickListener {
+            try {
+                // Use the current routine data to navigate to edit screen
+                viewModel.routine.value?.let { routineWithSteps ->
+                    val action = ViewSingleRoutineFragmentDirections
+                        .actionNavigationViewSingleRoutineToNavigationEditRoutine(
+                            routineId = routineWithSteps.routine.id,
+                            routineTitle = routineWithSteps.routine.title,
+                            routineDescription = routineWithSteps.routine.description
+                        )
+                    findNavController().navigate(action)
+                }
+            } catch (e: Exception) {
+                Log.e("ViewSingleRoutineFragment", "Error navigating to edit screen", e)
             }
         }
     }

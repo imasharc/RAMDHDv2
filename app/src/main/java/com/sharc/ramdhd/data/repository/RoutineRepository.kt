@@ -10,8 +10,9 @@ import java.time.LocalDateTime
 class RoutineRepository(private val routineDao: RoutineDao) {
     val allRoutines: Flow<List<RoutineWithSteps>> = routineDao.getAllRoutinesWithSteps()
 
-    fun getRoutineWithSteps(routineId: Int): Flow<RoutineWithSteps?> {
-        return routineDao.getRoutineWithSteps(routineId)
+    // Add new method for one-time routine fetch
+    suspend fun getRoutineWithStepsOnce(routineId: Int): RoutineWithSteps? {
+        return routineDao.getRoutineWithStepsOnce(routineId)
     }
 
     suspend fun insert(routine: Routine, steps: List<Step>) {
@@ -20,6 +21,14 @@ class RoutineRepository(private val routineDao: RoutineDao) {
 
     suspend fun update(routine: Routine) {
         routineDao.updateRoutine(routine)
+    }
+
+    suspend fun updateRoutine(routine: Routine, steps: List<Step>) {
+        routineDao.updateRoutineWithSteps(routine, steps)
+    }
+
+    suspend fun updateRoutineWithSteps(routine: Routine, steps: List<Step>) {
+        routineDao.updateRoutineWithSteps(routine, steps)
     }
 
     suspend fun updateStepCheckedState(stepId: Int, isChecked: Boolean) {
