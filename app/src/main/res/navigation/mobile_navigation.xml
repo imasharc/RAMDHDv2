@@ -126,6 +126,20 @@
             android:name="com.sharc.ramdhd.ui.dashboard.graphTasks.GraphTaskMenuFragment"
             android:label="Graph Tasks"
             tools:layout="@layout/fragment_graph_task_menu">
+                <action
+                    android:id="@+id/action_navigation_graph_task_menu_to_navigation_edit_graph_task"
+                    app:destination="@id/navigation_edit_graph_task"
+                    app:enterAnim="@anim/nav_default_enter_anim"
+                    app:exitAnim="@anim/nav_default_exit_anim"
+                    app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+                    app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        </fragment>
+
+        <fragment
+            android:id="@+id/navigation_edit_graph_task"
+            android:name="com.sharc.ramdhd.ui.dashboard.graphTasks.editSingle.EditGraphTaskFragment"
+            android:label="Edit Graph Task"
+            tools:layout="@layout/fragment_edit_graph_task">
 
         </fragment>
 
