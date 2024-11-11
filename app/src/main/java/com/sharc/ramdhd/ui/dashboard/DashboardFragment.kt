@@ -31,6 +31,11 @@ class DashboardFragment : Fragment() {
         binding.routineMenuPanel.setOnClickListener {
             findNavController().navigate(R.id.action_navigation_dashboard_to_navigation_routine_menu)
         }
+
+        // Set click listener for the graph task menu panel
+        binding.graphTaskMenuPanel.setOnClickListener {
+            findNavController().navigate(R.id.action_navigation_dashboard_to_navigation_graph_task_menu)
+        }
         return root
     }
 

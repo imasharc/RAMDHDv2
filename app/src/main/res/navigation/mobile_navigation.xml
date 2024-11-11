@@ -44,6 +44,13 @@
                     app:exitAnim="@anim/nav_default_exit_anim"
                     app:popEnterAnim="@anim/nav_default_pop_enter_anim"
                     app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+                <action
+                    android:id="@+id/action_navigation_dashboard_to_navigation_graph_task_menu"
+                    app:destination="@id/navigation_graph_task_menu"
+                    app:enterAnim="@anim/nav_default_enter_anim"
+                    app:exitAnim="@anim/nav_default_exit_anim"
+                    app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+                    app:popExitAnim="@anim/nav_default_pop_exit_anim" />
         </fragment>
 
         <fragment
@@ -112,6 +119,14 @@
                     app:argType="string[]"
                     app:nullable="true"
                     android:defaultValue="@null"/>
+        </fragment>
+
+        <fragment
+            android:id="@+id/navigation_graph_task_menu"
+            android:name="com.sharc.ramdhd.ui.dashboard.graphTasks.GraphTaskMenuFragment"
+            android:label="Graph Tasks"
+            tools:layout="@layout/fragment_graph_task_menu">
+
         </fragment>
 
         <fragment
