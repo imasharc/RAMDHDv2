@@ -140,7 +140,23 @@
             android:name="com.sharc.ramdhd.ui.dashboard.graphTasks.editSingle.EditGraphTaskFragment"
             android:label="Edit Graph Task"
             tools:layout="@layout/fragment_edit_graph_task">
-
+                <argument
+                    android:name="taskId"
+                    android:defaultValue="-1"
+                    app:argType="integer" />
+                <argument
+                    android:name="taskTitle"
+                    android:defaultValue=""
+                    app:argType="string" />
+                <argument
+                    android:name="taskDescription"
+                    android:defaultValue=""
+                    app:argType="string" />
+                <argument
+                    android:name="steps"
+                    android:defaultValue="@null"
+                    app:argType="string[]"
+                    app:nullable="true" />
         </fragment>
 
         <fragment
