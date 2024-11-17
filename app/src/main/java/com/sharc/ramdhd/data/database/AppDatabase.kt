@@ -3,7 +3,7 @@ import android.content.Context
 import androidx.room.*
 import com.sharc.ramdhd.data.dao.NoteDao
 import com.sharc.ramdhd.data.dao.RoutineDao
-import com.sharc.ramdhd.data.dao.graphTask.GraphTaskDao
+import com.sharc.ramdhd.data.dao.GraphTaskDao
 import com.sharc.ramdhd.data.model.Note
 import com.sharc.ramdhd.data.model.Routine
 import com.sharc.ramdhd.data.model.Step

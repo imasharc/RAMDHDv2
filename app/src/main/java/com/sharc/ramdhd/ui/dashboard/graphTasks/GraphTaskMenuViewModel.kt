@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.sharc.ramdhd.data.database.AppDatabase
-import com.sharc.ramdhd.data.repository.graphTask.GraphTaskRepository
+import com.sharc.ramdhd.data.repository.GraphTaskRepository
 import kotlinx.coroutines.flow.Flow
 import com.sharc.ramdhd.data.model.graphTask.GraphTaskWithSteps
 import kotlinx.coroutines.launch

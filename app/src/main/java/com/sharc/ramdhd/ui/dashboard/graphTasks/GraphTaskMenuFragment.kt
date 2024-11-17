@@ -43,11 +43,13 @@ class GraphTaskMenuFragment : Fragment(R.layout.fragment_graph_task_menu) {
         }
 
         adapter.setOnItemClickListener { graphTask ->
-//            findNavController().navigate(
-//                GraphTaskMenuFragmentDirections.actionNavigationGraphTaskMenuToNavigationEditGraphTask(
-//                    graphTask.task.id
-//                )
-//            )
+            Log.d(TAG, "Navigating to task with ID: ${graphTask.task.id}")
+            findNavController().navigate(
+                GraphTaskMenuFragmentDirections
+                    .actionNavigationGraphTaskMenuToNavigationViewSingleGraphTask(
+                        taskId = graphTask.task.id
+                    )
+            )
         }
 
         adapter.setOnSelectionChangedListener { selectedCount ->

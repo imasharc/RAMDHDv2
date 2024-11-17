@@ -1,6 +1,6 @@
-package com.sharc.ramdhd.data.repository.graphTask
+package com.sharc.ramdhd.data.repository
 
-import com.sharc.ramdhd.data.dao.graphTask.GraphTaskDao
+import com.sharc.ramdhd.data.dao.GraphTaskDao
 import com.sharc.ramdhd.data.model.graphTask.GraphTask
 import com.sharc.ramdhd.data.model.graphTask.GraphStep
 import com.sharc.ramdhd.data.model.graphTask.GraphTaskWithSteps

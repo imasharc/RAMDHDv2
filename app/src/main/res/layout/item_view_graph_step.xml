@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    android:gravity="center_vertical">
+
+    <TextView
+        android:id="@+id/textViewStepNumber"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:background="@drawable/circle_background"
+        android:gravity="center"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"/>
+
+    <TextView
+        android:id="@+id/textViewStepDescription"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:layout_marginStart="8dp"
+        android:textSize="16sp"/>
+
+    <ImageView
+        android:id="@+id/imageViewGratification"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="8dp"
+        android:src="@android:drawable/btn_star_big_on"
+        android:visibility="gone"/>
+
+    <ImageView
+        android:id="@+id/imageViewFinishing"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginStart="8dp"
+        android:src="@android:drawable/ic_menu_send"
+        android:visibility="gone"/>
+</LinearLayout>

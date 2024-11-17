@@ -9,7 +9,7 @@ import com.sharc.ramdhd.data.database.AppDatabase
 import com.sharc.ramdhd.data.model.graphTask.GraphTask
 import com.sharc.ramdhd.data.model.graphTask.GraphStep
 import com.sharc.ramdhd.data.model.graphTask.GraphTaskWithSteps
-import com.sharc.ramdhd.data.repository.graphTask.GraphTaskRepository
+import com.sharc.ramdhd.data.repository.GraphTaskRepository
 import java.time.LocalDateTime
 
 class EditGraphTaskViewModel(application: Application) : AndroidViewModel(application) {

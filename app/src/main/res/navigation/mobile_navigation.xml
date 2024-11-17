@@ -133,6 +133,23 @@
                     app:exitAnim="@anim/nav_default_exit_anim"
                     app:popEnterAnim="@anim/nav_default_pop_enter_anim"
                     app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+                <action
+                    android:id="@+id/action_navigation_graph_task_menu_to_navigation_view_single_graph_task"
+                    app:destination="@id/navigation_view_single_graph_task"
+                    app:enterAnim="@anim/nav_default_enter_anim"
+                    app:exitAnim="@anim/nav_default_exit_anim"
+                    app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+                    app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        </fragment>
+
+        <fragment
+            android:id="@+id/navigation_view_single_graph_task"
+            android:name="com.sharc.ramdhd.ui.dashboard.graphTasks.viewSingle.ViewSingleGraphTaskFragment"
+            android:label="View Graph Task"
+            tools:layout="@layout/fragment_view_single_graph_task">
+                <argument
+                    android:name="taskId"
+                    app:argType="integer" />
         </fragment>
 
         <fragment
