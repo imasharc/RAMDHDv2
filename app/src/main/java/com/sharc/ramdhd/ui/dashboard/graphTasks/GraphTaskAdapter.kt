@@ -3,11 +3,15 @@ package com.sharc.ramdhd.ui.dashboard.graphTasks
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.graphics.Paint
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.sharc.ramdhd.data.model.graphTask.GraphTaskWithSteps
-import com.sharc.ramdhd.databinding.ItemNoteBinding
+import com.sharc.ramdhd.databinding.ItemGraphTaskBinding
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 class GraphTaskAdapter : ListAdapter<GraphTaskWithSteps, GraphTaskAdapter.GraphTaskViewHolder>(GraphTaskDiffCallback()) {
     private var selectionMode = false
@@ -32,7 +36,6 @@ class GraphTaskAdapter : ListAdapter<GraphTaskWithSteps, GraphTaskAdapter.GraphT
         selectionMode = !selectionMode
         if (!selectionMode) {
             selectedTasks.clear()
-            onSelectionChanged?.invoke(0) // Ensure UI updates when exiting selection mode
         }
         notifyDataSetChanged()
     }
@@ -48,7 +51,6 @@ class GraphTaskAdapter : ListAdapter<GraphTaskWithSteps, GraphTaskAdapter.GraphT
 
     fun deselectAllTasks() {
         selectedTasks.clear()
-        selectionMode = false // Exit selection mode when deselecting all
         notifyDataSetChanged()
         onSelectionChanged?.invoke(0)
     }
@@ -60,7 +62,7 @@ class GraphTaskAdapter : ListAdapter<GraphTaskWithSteps, GraphTaskAdapter.GraphT
     fun getSelectedTasks(): Set<GraphTaskWithSteps> = selectedTasks.toSet()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GraphTaskViewHolder {
-        val binding = ItemNoteBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val binding = ItemGraphTaskBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         return GraphTaskViewHolder(binding)
     }
 
@@ -72,20 +74,11 @@ class GraphTaskAdapter : ListAdapter<GraphTaskWithSteps, GraphTaskAdapter.GraphT
             if (selectionMode) {
                 if (selectedTasks.contains(graphTask)) {
                     selectedTasks.remove(graphTask)
-                    // Exit selection mode if no items are selected
-                    if (selectedTasks.isEmpty()) {
-                        selectionMode = false
-                        onSelectionChanged?.invoke(0)
-                        notifyDataSetChanged()
-                    } else {
-                        notifyItemChanged(position)
-                        onSelectionChanged?.invoke(selectedTasks.size)
-                    }
                 } else {
                     selectedTasks.add(graphTask)
-                    notifyItemChanged(position)
-                    onSelectionChanged?.invoke(selectedTasks.size)
                 }
+                notifyItemChanged(position)
+                onSelectionChanged?.invoke(selectedTasks.size)
             } else {
                 onItemClickListener?.invoke(graphTask)
             }
@@ -94,7 +87,7 @@ class GraphTaskAdapter : ListAdapter<GraphTaskWithSteps, GraphTaskAdapter.GraphT
         holder.itemView.setOnLongClickListener {
             if (!selectionMode) {
                 onItemLongClickListener?.invoke(graphTask)
-                selectionMode = true
+                toggleSelectionMode()
                 selectedTasks.add(graphTask)
                 notifyDataSetChanged()
                 onSelectionChanged?.invoke(selectedTasks.size)
@@ -103,57 +96,84 @@ class GraphTaskAdapter : ListAdapter<GraphTaskWithSteps, GraphTaskAdapter.GraphT
         }
     }
 
-    class GraphTaskViewHolder(private val binding: ItemNoteBinding) :
+    class GraphTaskViewHolder(private val binding: ItemGraphTaskBinding) :
         RecyclerView.ViewHolder(binding.root) {
+
+        private val inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
+        private val outputFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")
 
         fun bind(graphTask: GraphTaskWithSteps, isSelectionMode: Boolean, isSelected: Boolean) {
             binding.apply {
-                textViewNoteTitle.text = graphTask.task.title
-                // Show number of steps as the subtitle
-                textViewNoteDate.text = "${graphTask.steps.size} steps"
+                textViewGraphTaskTitle.text = graphTask.task.title
 
-                // Smooth checkbox animation
+                // Handle completed state
+                if (graphTask.task.isCompleted) {
+                    // Change the entire card background to green
+                    root.setCardBackgroundColor(
+                        ContextCompat.getColor(root.context, android.R.color.holo_green_light)
+                    )
+                    textViewGraphTaskTitle.setTextColor(
+                        ContextCompat.getColor(root.context, android.R.color.black)
+                    )
+                    textViewGraphTaskDate.setTextColor(
+                        ContextCompat.getColor(root.context, android.R.color.darker_gray)
+                    )
+                } else {
+                    // Reset to default colors
+                    root.setCardBackgroundColor(
+                        ContextCompat.getColor(root.context, android.R.color.white)
+                    )
+                    textViewGraphTaskTitle.setTextColor(
+                        ContextCompat.getColor(root.context, android.R.color.black)
+                    )
+                    textViewGraphTaskDate.setTextColor(
+                        ContextCompat.getColor(root.context, android.R.color.darker_gray)
+                    )
+                }
+
+                try {
+                    val dateTime = LocalDateTime.parse(
+                        graphTask.task.timestamp.toString(),
+                        inputFormatter
+                    )
+                    textViewGraphTaskDate.text = dateTime.format(outputFormatter)
+                } catch (e: Exception) {
+                    textViewGraphTaskDate.text = graphTask.task.timestamp.toString()
+                }
+
+                // Handle selection mode
                 if (isSelectionMode) {
-                    checkBoxNote.alpha = 0f
-                    checkBoxNote.visibility = View.VISIBLE
-                    checkBoxNote.animate()
+                    checkBoxGraphTask.alpha = 0f
+                    checkBoxGraphTask.visibility = View.VISIBLE
+                    checkBoxGraphTask.animate()
                         .alpha(1f)
                         .setDuration(50)
                         .start()
                 } else {
-                    checkBoxNote.animate()
+                    checkBoxGraphTask.animate()
                         .alpha(0f)
                         .setDuration(50)
                         .withEndAction {
-                            checkBoxNote.visibility = View.GONE
+                            checkBoxGraphTask.visibility = View.GONE
                         }
                         .start()
                 }
 
-                // Update checkbox state
-                checkBoxNote.isChecked = isSelected
+                checkBoxGraphTask.isChecked = isSelected
                 root.isActivated = isSelected
-
-                // Disable checkbox's own click listener
-                checkBoxNote.isClickable = false
-                checkBoxNote.isFocusable = false
+                checkBoxGraphTask.isClickable = false
+                checkBoxGraphTask.isFocusable = false
             }
         }
     }
+}
 
-    class GraphTaskDiffCallback : DiffUtil.ItemCallback<GraphTaskWithSteps>() {
-        override fun areItemsTheSame(
-            oldItem: GraphTaskWithSteps,
-            newItem: GraphTaskWithSteps
-        ): Boolean {
-            return oldItem.task.id == newItem.task.id
-        }
+private class GraphTaskDiffCallback : DiffUtil.ItemCallback<GraphTaskWithSteps>() {
+    override fun areItemsTheSame(oldItem: GraphTaskWithSteps, newItem: GraphTaskWithSteps): Boolean {
+        return oldItem.task.id == newItem.task.id
+    }
 
-        override fun areContentsTheSame(
-            oldItem: GraphTaskWithSteps,
-            newItem: GraphTaskWithSteps
-        ): Boolean {
-            return oldItem == newItem
-        }
+    override fun areContentsTheSame(oldItem: GraphTaskWithSteps, newItem: GraphTaskWithSteps): Boolean {
+        return oldItem == newItem
     }
 }

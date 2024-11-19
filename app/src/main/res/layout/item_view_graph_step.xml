@@ -1,28 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:padding="8dp"
-    android:gravity="center_vertical">
+    android:gravity="center_vertical"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="@android:color/white">
 
     <TextView
         android:id="@+id/textViewStepNumber"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:background="@drawable/circle_background"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:background="@drawable/circle_background_purple"
         android:gravity="center"
         android:textColor="@android:color/white"
-        android:textSize="14sp"/>
+        android:textSize="28sp"/>
 
     <TextView
         android:id="@+id/textViewStepDescription"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:layout_marginStart="8dp"
-        android:textSize="16sp"/>
+        android:layout_marginStart="16dp"
+        android:textSize="16sp"
+        android:textColor="@android:color/black"/>
 
     <ImageView
         android:id="@+id/imageViewGratification"
@@ -39,4 +42,11 @@
         android:layout_marginStart="8dp"
         android:src="@android:drawable/ic_menu_send"
         android:visibility="gone"/>
+
+    <CheckBox
+        android:id="@+id/checkboxComplete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:clickable="false"
+        android:focusable="false"/>
 </LinearLayout>

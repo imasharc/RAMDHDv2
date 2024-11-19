@@ -23,5 +23,7 @@ data class GraphStep(
     val orderNumber: Int,
     val description: String,
     var isGratification: Boolean = false,
-    var isFinishing: Boolean = false
+    var isFinishing: Boolean = false,
+    var icon: String? = null,
+    var isCompleted: Boolean = false
 )

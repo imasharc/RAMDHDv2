@@ -5,4 +5,5 @@
     <dimen name="design_margin">8dp</dimen>
     <dimen name="margin_normal">16dp</dimen>
     <dimen name="padding_normal">16dp</dimen>
+    <dimen name="tab_min_width">100dp</dimen>
 </resources>

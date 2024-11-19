@@ -38,4 +38,66 @@ class ViewSingleGraphTaskViewModel(private val repository: GraphTaskRepository) 
             }
         }
     }
+
+    fun handleStepStateChange(
+        stepId: Int,
+        isCompleted: Boolean,
+        taskId: Int,
+        onCompletion: (Boolean) -> Unit
+    ) {
+        viewModelScope.launch {
+            try {
+                repository.updateStepCompletion(stepId, isCompleted)
+
+                // Check if all steps are completed after updating
+                val allCompleted = repository.areAllStepsCompleted(taskId)
+
+                // Reload task data to refresh the UI
+                loadGraphTask(taskId)
+
+                // Notify about completion status
+                onCompletion(allCompleted)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error handling step state change: ${e.message}", e)
+            }
+        }
+    }
+
+    fun updateStepIcon(stepId: Int, icon: String) {
+        viewModelScope.launch {
+            try {
+                repository.updateStepIcon(stepId, icon)
+                // Reload the task to refresh the UI
+                _graphTask.value?.task?.id?.let { taskId ->
+                    loadGraphTask(taskId)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error updating step icon: ${e.message}", e)
+            }
+        }
+    }
+
+    fun updateStepCompletion(stepId: Int, isCompleted: Boolean) {
+        viewModelScope.launch {
+            try {
+                repository.updateStepCompletion(stepId, isCompleted)
+                // Reload to refresh the UI
+                _graphTask.value?.task?.id?.let { taskId ->
+                    loadGraphTask(taskId)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error updating step completion: ${e.message}", e)
+            }
+        }
+    }
+
+    fun resetTask(taskId: Int) {
+        viewModelScope.launch {
+            try {
+                repository.resetTask(taskId)
+            } catch (e: Exception) {
+                Log.e(TAG, "Error resetting task: ${e.message}", e)
+            }
+        }
+    }
 }

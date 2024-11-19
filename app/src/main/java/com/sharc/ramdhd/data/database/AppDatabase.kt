@@ -20,7 +20,7 @@ import java.time.ZoneId
         GraphTask::class,
         GraphStep::class
     ],
-    version = 6,  // Incremented version for new entities
+    version = 9,  // Incremented version for new entities
     exportSchema = false
 )
 @TypeConverters(Converters::class)
