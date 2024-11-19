@@ -84,7 +84,10 @@ class EditGraphTaskFragment : Fragment() {
     private fun loadInitialData() {
         Log.d(TAG, "Loading initial data, taskId: ${args.taskId}")
         viewModel.setTaskId(args.taskId)
-        viewModel.initializeSteps(args.steps)
+        viewModel.initializeSteps(
+            steps = args.steps,
+            gratificationSteps = args.gratificationSteps
+        )
 
         if (args.taskId == -1) {
             titleInput.requestFocus()

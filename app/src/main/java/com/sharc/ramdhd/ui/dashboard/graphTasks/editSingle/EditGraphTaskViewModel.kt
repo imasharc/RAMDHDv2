@@ -22,7 +22,7 @@ class EditGraphTaskViewModel(application: Application) : AndroidViewModel(applic
     private val repository: GraphTaskRepository
     private var taskId: Int = -1
     private var currentSteps = MutableList(MIN_STEPS) { "" }
-    private var gratificationStepIndices = mutableSetOf<Int>()  // Changed to Set to store multiple indices
+    private var gratificationStepIndices = mutableSetOf<Int>()
 
     init {
         Log.d(TAG, "Initializing EditGraphTaskViewModel")
@@ -32,8 +32,10 @@ class EditGraphTaskViewModel(application: Application) : AndroidViewModel(applic
 
     fun getSteps(): LiveData<MutableList<String>> = _steps
 
-    fun initializeSteps(steps: Array<String>?) {
+    fun initializeSteps(steps: Array<String>?, gratificationSteps: IntArray? = null) {
         Log.d(TAG, "Initializing steps: ${steps?.joinToString()}")
+        Log.d(TAG, "Initializing gratification steps: ${gratificationSteps?.joinToString()}")
+
         currentSteps = if (steps != null) {
             steps.toMutableList().also {
                 while (it.size < MIN_STEPS) {
@@ -44,7 +46,13 @@ class EditGraphTaskViewModel(application: Application) : AndroidViewModel(applic
             MutableList(MIN_STEPS) { "" }
         }
         _steps.value = currentSteps
-        gratificationStepIndices.clear()  // Reset gratification steps
+
+        // Initialize gratification states from passed data
+        gratificationStepIndices.clear()
+        gratificationSteps?.forEach { index ->
+            gratificationStepIndices.add(index)
+            Log.d(TAG, "Added gratification step at index: $index")
+        }
     }
 
     fun updateStep(index: Int, text: String) {
@@ -68,10 +76,12 @@ class EditGraphTaskViewModel(application: Application) : AndroidViewModel(applic
     fun updateStepGratification(index: Int, isGratification: Boolean) {
         if (isGratification) {
             gratificationStepIndices.add(index)
+            Log.d(TAG, "Marked step $index as gratification step")
         } else {
             gratificationStepIndices.remove(index)
+            Log.d(TAG, "Removed gratification mark from step $index")
         }
-        Log.d(TAG, "Gratification steps updated: $gratificationStepIndices")
+        Log.d(TAG, "Current gratification steps: $gratificationStepIndices")
     }
 
     fun isStepGratification(index: Int): Boolean {
@@ -94,8 +104,8 @@ class EditGraphTaskViewModel(application: Application) : AndroidViewModel(applic
                     taskId = taskId,
                     orderNumber = index,
                     description = stepText,
-                    isFinishing = index == lastWrittenIndex,  // Last step is finishing step
-                    isGratification = gratificationStepIndices.contains(index)  // Check if this step is marked for gratification
+                    isFinishing = index == lastWrittenIndex,
+                    isGratification = gratificationStepIndices.contains(index)
                 )
             }
 
@@ -104,9 +114,10 @@ class EditGraphTaskViewModel(application: Application) : AndroidViewModel(applic
                 throw IllegalStateException("At least $MIN_STEPS steps are required")
             }
 
-            Log.d(TAG, "Steps to save: ${stepsToSave.joinToString {
-                "${it.description} (Finishing: ${it.isFinishing}, Gratification: ${it.isGratification})"
-            }}")
+            Log.d(TAG, """Steps to save: 
+                ${stepsToSave.joinToString("\n") {
+                "- ${it.description} (Finishing: ${it.isFinishing}, Gratification: ${it.isGratification})"
+            }}""".trimIndent())
 
             return if (taskId != -1) {
                 val updatedTask = GraphTask(
@@ -133,8 +144,8 @@ class EditGraphTaskViewModel(application: Application) : AndroidViewModel(applic
                 Log.d(TAG, """Successfully saved graph task:
                     Title: ${result.task.title}
                     Description: ${result.task.description}
-                    Steps: ${result.steps.joinToString {
-                    "${it.description} (Finishing: ${it.isFinishing}, Gratification: ${it.isGratification})"
+                    Steps: ${result.steps.joinToString("\n") {
+                    "- ${it.description} (Finishing: ${it.isFinishing}, Gratification: ${it.isGratification})"
                 }}""".trimIndent())
             }
         } catch (e: Exception) {
@@ -145,5 +156,6 @@ class EditGraphTaskViewModel(application: Application) : AndroidViewModel(applic
 
     fun setTaskId(id: Int) {
         this.taskId = id
+        Log.d(TAG, "Set task ID to: $id")
     }
 }

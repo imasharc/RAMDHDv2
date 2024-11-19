@@ -18,7 +18,11 @@ class GraphTaskRepository(private val graphTaskDao: GraphTaskDao) {
     }
 
     suspend fun updateGraphTaskWithSteps(task: GraphTask, steps: List<GraphStep>) {
-        graphTaskDao.updateGraphTaskWithSteps(task, steps)
+        graphTaskDao.updateGraphTaskWithSteps(task, steps.map { step ->
+            // Preserve existing gratification state if present
+            val existingStep = graphTaskDao.getStep(step.id)
+            step.copy(isGratification = existingStep?.isGratification ?: step.isGratification)
+        })
     }
 
     suspend fun delete(tasks: List<GraphTask>) {
