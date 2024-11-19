@@ -28,6 +28,9 @@ class ViewSingleGraphTaskViewModel(private val repository: GraphTaskRepository) 
                         Title: ${task.task.title}
                         Description: ${task.task.description}
                         Steps count: ${task.steps.size}
+                        Steps details: ${task.steps.joinToString("\n") {
+                        "- ${it.description} (Gratification: ${it.isGratification}, Completed: ${it.isCompleted})"
+                    }}
                     """.trimIndent())
                     _graphTask.value = task
                 } else {
@@ -47,10 +50,12 @@ class ViewSingleGraphTaskViewModel(private val repository: GraphTaskRepository) 
     ) {
         viewModelScope.launch {
             try {
+                Log.d(TAG, "Updating step $stepId completion state to: $isCompleted")
                 repository.updateStepCompletion(stepId, isCompleted)
 
                 // Check if all steps are completed after updating
                 val allCompleted = repository.areAllStepsCompleted(taskId)
+                Log.d(TAG, "All steps completed: $allCompleted")
 
                 // Reload task data to refresh the UI
                 loadGraphTask(taskId)
@@ -66,7 +71,9 @@ class ViewSingleGraphTaskViewModel(private val repository: GraphTaskRepository) 
     fun updateStepIcon(stepId: Int, icon: String) {
         viewModelScope.launch {
             try {
+                Log.d(TAG, "Updating step $stepId icon to: $icon")
                 repository.updateStepIcon(stepId, icon)
+
                 // Reload the task to refresh the UI
                 _graphTask.value?.task?.id?.let { taskId ->
                     loadGraphTask(taskId)
@@ -80,7 +87,15 @@ class ViewSingleGraphTaskViewModel(private val repository: GraphTaskRepository) 
     fun updateStepCompletion(stepId: Int, isCompleted: Boolean) {
         viewModelScope.launch {
             try {
+                Log.d(TAG, "Updating step $stepId completion state to: $isCompleted")
                 repository.updateStepCompletion(stepId, isCompleted)
+
+                // Also check if the step is a gratification step
+                val step = repository.getStep(stepId)
+                if (step?.isGratification == true) {
+                    Log.d(TAG, "Updated gratification step $stepId completion state")
+                }
+
                 // Reload to refresh the UI
                 _graphTask.value?.task?.id?.let { taskId ->
                     loadGraphTask(taskId)
@@ -94,9 +109,30 @@ class ViewSingleGraphTaskViewModel(private val repository: GraphTaskRepository) 
     fun resetTask(taskId: Int) {
         viewModelScope.launch {
             try {
+                Log.d(TAG, "Resetting task $taskId")
                 repository.resetTask(taskId)
+
+                // Reload to show reset state
+                loadGraphTask(taskId)
+                Log.d(TAG, "Task reset completed")
             } catch (e: Exception) {
                 Log.e(TAG, "Error resetting task: ${e.message}", e)
+            }
+        }
+    }
+
+    fun updateStepGratification(stepId: Int, isGratification: Boolean) {
+        viewModelScope.launch {
+            try {
+                Log.d(TAG, "Updating step $stepId gratification state to: $isGratification")
+                repository.updateStepGratification(stepId, isGratification)
+
+                // Reload to refresh the UI
+                _graphTask.value?.task?.id?.let { taskId ->
+                    loadGraphTask(taskId)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error updating step gratification: ${e.message}", e)
             }
         }
     }

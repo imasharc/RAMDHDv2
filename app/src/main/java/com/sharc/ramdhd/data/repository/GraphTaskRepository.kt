@@ -46,6 +46,10 @@ class GraphTaskRepository(private val graphTaskDao: GraphTaskDao) {
         }
     }
 
+    suspend fun updateStepGratification(stepId: Int, isGratification: Boolean) {
+        graphTaskDao.updateStepGratification(stepId, isGratification)
+    }
+
     suspend fun areAllStepsCompleted(taskId: Int): Boolean {
         val completedCount = graphTaskDao.getCompletedStepsCount(taskId)
         val totalCount = graphTaskDao.getTotalStepsCount(taskId)

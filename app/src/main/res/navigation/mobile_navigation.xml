@@ -147,6 +147,13 @@
             android:name="com.sharc.ramdhd.ui.dashboard.graphTasks.viewSingle.ViewSingleGraphTaskFragment"
             android:label="View Graph Task"
             tools:layout="@layout/fragment_view_single_graph_task">
+                <action
+                    android:id="@+id/action_navigation_view_single_graph_task_to_navigation_edit_graph_task"
+                    app:destination="@id/navigation_edit_graph_task"
+                    app:enterAnim="@anim/nav_default_enter_anim"
+                    app:exitAnim="@anim/nav_default_exit_anim"
+                    app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+                    app:popExitAnim="@anim/nav_default_pop_exit_anim" />
                 <argument
                     android:name="taskId"
                     app:argType="integer" />
@@ -173,6 +180,11 @@
                     android:name="steps"
                     android:defaultValue="@null"
                     app:argType="string[]"
+                    app:nullable="true" />
+                <argument
+                    android:name="gratificationSteps"
+                    app:argType="integer[]"
+                    android:defaultValue="@null"
                     app:nullable="true" />
         </fragment>
 

@@ -164,20 +164,17 @@ class EditGraphTaskFragment : Fragment() {
                     marginStart = (8 * resources.displayMetrics.density).toInt()
                 }
                 text = "Gratification"
+                isChecked = args.gratificationSteps?.contains(index) == true
 
-                // Update to handle multiple selections
                 setOnCheckedChangeListener { _, isChecked ->
                     viewModel.updateStepGratification(index, isChecked)
                 }
-                id = R.id.checkboxGratification
             }
 
-            // Add views to the container
             stepContainer.addView(stepInput)
             stepContainer.addView(gratificationCheckbox)
-
-            // Add the container to the main steps container
             stepsContainer.addView(stepContainer)
+
             Log.d(TAG, "Successfully added step field at index $index")
         } catch (e: Exception) {
             Log.e(TAG, "Error adding step field: ${e.message}", e)

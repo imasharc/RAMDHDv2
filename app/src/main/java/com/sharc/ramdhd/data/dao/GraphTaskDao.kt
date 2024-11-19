@@ -70,4 +70,7 @@ interface GraphTaskDao {
 
     @Query("UPDATE graph_tasks SET isCompleted = 0 WHERE id = :taskId")
     suspend fun markTaskAsNotCompleted(taskId: Int)
+
+    @Query("UPDATE graph_steps SET isGratification = :isGratification WHERE id = :stepId")
+    suspend fun updateStepGratification(stepId: Int, isGratification: Boolean)
 }

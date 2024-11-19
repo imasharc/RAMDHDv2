@@ -1,5 +1,6 @@
 package com.sharc.ramdhd.ui.dashboard.graphTasks.viewSingle
 
+import android.content.ContentValues.TAG
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -66,6 +67,10 @@ class ViewSingleGraphTaskFragment : Fragment(R.layout.fragment_view_single_graph
             adapter = stepAdapter
             layoutManager = LinearLayoutManager(requireContext())
             setHasFixedSize(true)
+        }
+
+        binding.fabEdit.setOnClickListener {
+            navigateToEdit()
         }
     }
 
@@ -170,27 +175,33 @@ class ViewSingleGraphTaskFragment : Fragment(R.layout.fragment_view_single_graph
         }
     }
 
-//    private fun navigateToEdit() {
-//        try {
-//            viewModel.graphTask.value?.let { taskWithSteps ->
-//                val steps = taskWithSteps.steps
-//                    .sortedBy { it.orderNumber }
-//                    .map { it.description }
-//                    .toTypedArray()
-//
-//                val action = ViewSingleGraphTaskFragmentDirections
-//                    .actionNavigationViewSingleGraphTaskToNavigationEditGraphTask(
-//                        taskId = taskWithSteps.task.id,
-//                        taskTitle = taskWithSteps.task.title,
-//                        taskDescription = taskWithSteps.task.description,
-//                        steps = steps
-//                    )
-//                findNavController().navigate(action)
-//            }
-//        } catch (e: Exception) {
-//            Log.e(TAG, "Error navigating to edit screen", e)
-//        }
-//    }
+    private fun navigateToEdit() {
+        try {
+            viewModel.graphTask.value?.let { graphTaskWithSteps ->
+                val steps = graphTaskWithSteps.steps
+                    .sortedBy { it.orderNumber }
+                    .map { it.description }
+                    .toTypedArray()
+
+                val gratificationSteps = graphTaskWithSteps.steps
+                    .filter { it.isGratification }
+                    .map { it.orderNumber }
+                    .toIntArray()
+
+                val action = ViewSingleGraphTaskFragmentDirections
+                    .actionNavigationViewSingleGraphTaskToNavigationEditGraphTask(
+                        taskId = args.taskId,
+                        taskTitle = binding.textViewTitle.text.toString(),
+                        taskDescription = binding.textViewDescription.text.toString(),
+                        steps = steps,
+                        gratificationSteps = gratificationSteps
+                    )
+                findNavController().navigate(action)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error navigating to edit screen", e)
+        }
+    }
 
     override fun onDestroyView() {
         super.onDestroyView()
