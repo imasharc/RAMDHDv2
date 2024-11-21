@@ -9,14 +9,28 @@
     android:focusable="true"
     android:background="@android:color/white">
 
-    <TextView
-        android:id="@+id/textViewStepNumber"
+    <FrameLayout
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:background="@drawable/circle_background_purple"
-        android:gravity="center"
-        android:textColor="@android:color/white"
-        android:textSize="28sp"/>
+        android:background="@drawable/circle_background_purple">
+
+        <ImageView
+            android:id="@+id/imageViewStepIcon"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_gravity="center"
+            android:visibility="visible"
+            android:src="@drawable/media_image"/>
+
+        <TextView
+            android:id="@+id/textViewStepIcon"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:textColor="@android:color/white"
+            android:textSize="28sp"
+            android:visibility="gone"/>
+    </FrameLayout>
 
     <TextView
         android:id="@+id/textViewStepDescription"

@@ -6,6 +6,7 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.sharc.ramdhd.R
 import com.sharc.ramdhd.data.model.graphTask.GraphStep
 import com.sharc.ramdhd.databinding.ItemViewGraphStepBinding
 
@@ -13,7 +14,6 @@ class ViewGraphStepAdapter(
     private val onStepIconClicked: (GraphStep) -> Unit,
     private val onStepCompletionChanged: (GraphStep, Boolean) -> Unit
 ) : ListAdapter<GraphStep, ViewGraphStepAdapter.ViewHolder>(GraphStepDiffCallback()) {
-
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemViewGraphStepBinding.inflate(
             LayoutInflater.from(parent.context),
@@ -30,20 +30,38 @@ class ViewGraphStepAdapter(
 
     class ViewHolder(private val binding: ItemViewGraphStepBinding) :
         RecyclerView.ViewHolder(binding.root) {
-
         fun bind(
             step: GraphStep,
             onStepIconClicked: (GraphStep) -> Unit,
             onStepCompletionChanged: (GraphStep, Boolean) -> Unit
         ) {
             binding.apply {
-                textViewStepNumber.text = step.icon ?: (step.orderNumber + 1).toString()
+                // Handle icon display
+                when {
+                    step.icon != null -> {
+                        // Show custom icon (emoji or text)
+                        imageViewStepIcon.visibility = View.GONE
+                        textViewStepIcon.visibility = View.VISIBLE
+                        textViewStepIcon.text = step.icon
+                    }
+                    else -> {
+                        // Show default media SVG
+                        imageViewStepIcon.visibility = View.VISIBLE
+                        textViewStepIcon.visibility = View.GONE
+                        imageViewStepIcon.setImageResource(R.drawable.media_image)
+                    }
+                }
+
                 textViewStepDescription.text = step.description
 
                 // Remove previous listeners
                 checkboxComplete.setOnCheckedChangeListener(null)
                 root.setOnClickListener(null)
-                textViewStepNumber.setOnClickListener(null)
+
+                // Set up click listener for both icon views
+                val iconClickListener = View.OnClickListener { onStepIconClicked(step) }
+                imageViewStepIcon.setOnClickListener(iconClickListener)
+                textViewStepIcon.setOnClickListener(iconClickListener)
 
                 // Set the checked state
                 checkboxComplete.isChecked = step.isCompleted
@@ -58,13 +76,9 @@ class ViewGraphStepAdapter(
                         ContextCompat.getColor(root.context, android.R.color.white)
                 )
 
-                // Set click listeners
+                // Set click listener for the entire item
                 root.setOnClickListener {
                     onStepCompletionChanged(step, !step.isCompleted)
-                }
-
-                textViewStepNumber.setOnClickListener {
-                    onStepIconClicked(step)
                 }
 
                 // Set icon visibility
@@ -78,7 +92,6 @@ class ViewGraphStepAdapter(
         override fun areItemsTheSame(oldItem: GraphStep, newItem: GraphStep): Boolean {
             return oldItem.id == newItem.id
         }
-
         override fun areContentsTheSame(oldItem: GraphStep, newItem: GraphStep): Boolean {
             return oldItem == newItem
         }
