@@ -37,6 +37,11 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginTop="16dp"
+        android:clipToPadding="false"
+        android:paddingBottom="116dp"
+        android:scrollbars="vertical"
+        android:fadeScrollbars="true"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         app:layout_constraintTop_toBottomOf="@id/textViewDescription"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -59,5 +64,4 @@
         app:tint="#2196F3"
         app:elevation="6dp"
         app:rippleColor="@null" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>
