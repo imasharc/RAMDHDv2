@@ -4,6 +4,8 @@ import android.os.CountDownTimer
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 class TimerViewModel : ViewModel() {
@@ -22,13 +24,43 @@ class TimerViewModel : ViewModel() {
     private val _resetPickers = MutableLiveData(false)
     val resetPickers: LiveData<Boolean> = _resetPickers
 
-    private var countDownTimer: CountDownTimer? = null
-    private var remainingTimeMillis: Long = 0
-    private var originalTimeMillis: Long = 0
-
     private var hours: Int = 0
     private var minutes: Int = 0
     private var seconds: Int = 0
+
+    private var originalTimeMillis: Long = 0
+    private var timerService: TimerService? = null
+
+    fun setTimerService(service: TimerService) {
+        timerService = service
+        observeTimerState(service)
+    }
+
+    private fun observeTimerState(service: TimerService) {
+        viewModelScope.launch {
+            service.timerState.collect { state ->
+                when (state) {
+                    is TimerState.Running -> {
+                        _isRunning.value = true
+                        updateTimerText(state.remainingMillis)
+                    }
+                    is TimerState.Stopped -> {
+                        _isRunning.value = false
+                        _canStart.value = state.remainingMillis > 0
+                        updateTimerText(state.remainingMillis)
+                    }
+                    is TimerState.Finished -> {
+                        _isRunning.value = false
+                        _timerFinished.value = true
+                        resetToOriginalTime()
+                    }
+                    TimerState.Idle -> {
+                        _isRunning.value = false
+                    }
+                }
+            }
+        }
+    }
 
     fun setHours(value: Int) {
         hours = value
@@ -47,39 +79,21 @@ class TimerViewModel : ViewModel() {
 
     private fun updateOriginalTime() {
         originalTimeMillis = ((hours * 3600L) + (minutes * 60L) + seconds) * 1000L
-        remainingTimeMillis = originalTimeMillis
-        updateTimerText()
+        updateTimerText(originalTimeMillis)
         _canStart.value = originalTimeMillis > 0
     }
 
     fun startTimer() {
-        if (_isRunning.value == true || remainingTimeMillis <= 0) return
-
-        countDownTimer = object : CountDownTimer(remainingTimeMillis, 1000) {
-            override fun onTick(millisUntilFinished: Long) {
-                remainingTimeMillis = millisUntilFinished
-                updateTimerText()
-            }
-
-            override fun onFinish() {
-                _isRunning.value = false
-                _timerFinished.value = true
-                resetToOriginalTime()
-            }
-        }.start()
-
-        _isRunning.value = true
+        if (_isRunning.value == true || originalTimeMillis <= 0) return
+        timerService?.startTimer(originalTimeMillis)
     }
 
     fun stopTimer() {
-        countDownTimer?.cancel()
-        _isRunning.value = false
-        _canStart.value = remainingTimeMillis > 0
+        timerService?.stopTimer()
     }
 
     fun resetTimer() {
-        countDownTimer?.cancel()
-        _isRunning.value = false
+        stopTimer()
         hours = 0
         minutes = 0
         seconds = 0
@@ -88,13 +102,12 @@ class TimerViewModel : ViewModel() {
     }
 
     private fun resetToOriginalTime() {
-        remainingTimeMillis = originalTimeMillis
-        updateTimerText()
+        updateTimerText(originalTimeMillis)
         _canStart.value = originalTimeMillis > 0
     }
 
-    private fun updateTimerText() {
-        val totalSeconds = remainingTimeMillis / 1000
+    private fun updateTimerText(millis: Long) {
+        val totalSeconds = millis / 1000
         val hours = totalSeconds / 3600
         val minutes = (totalSeconds % 3600) / 60
         val seconds = totalSeconds % 60
@@ -111,6 +124,6 @@ class TimerViewModel : ViewModel() {
 
     override fun onCleared() {
         super.onCleared()
-        countDownTimer?.cancel()
+        stopTimer()
     }
 }

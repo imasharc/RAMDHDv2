@@ -1,20 +1,29 @@
 package com.sharc.ramdhd.ui.timer
 
 import android.Manifest
+import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.content.ComponentName
 import android.content.Context
+import android.content.Intent
+import android.content.ServiceConnection
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
+import android.os.PowerManager
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.os.VibratorManager
+import android.provider.Settings
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -25,9 +34,6 @@ import com.sharc.ramdhd.databinding.FragmentTimerBinding
 class TimerFragment : Fragment() {
     private var _binding: FragmentTimerBinding? = null
     private val viewModel: TimerViewModel by viewModels()
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
     private lateinit var notificationManager: NotificationManager
     private lateinit var vibrator: Vibrator
@@ -40,6 +46,48 @@ class TimerFragment : Fragment() {
         } else {
             // Permission denied, inform the user that they won't receive notifications
             Toast.makeText(requireContext(), "Notifications are disabled", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private var timerService: TimerService? = null
+    private val serviceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = service as TimerService.TimerBinder
+            timerService = binder.getService()
+            viewModel.setTimerService(binder.getService())
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            timerService = null
+        }
+    }
+
+    private fun checkAlarmPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val alarmManager = requireContext().getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            if (!alarmManager.canScheduleExactAlarms()) {
+                AlertDialog.Builder(requireContext())
+                    .setTitle("Alarm Permission")
+                    .setMessage("For the timer to work properly when the app is in background, please allow scheduling exact alarms.")
+                    .setPositiveButton("Settings") { _, _ ->
+                        startActivity(Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM))
+                    }
+                    .setNegativeButton("Later") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .show()
+            }
+        }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        checkBatteryOptimization()
+        checkAlarmPermission() // Add this line
+        // Start and bind to TimerService
+        Intent(requireContext(), TimerService::class.java).also { intent ->
+            requireContext().startService(intent)
+            requireContext().bindService(intent, serviceConnection, Context.BIND_AUTO_CREATE)
         }
     }
 
@@ -64,6 +112,48 @@ class TimerFragment : Fragment() {
             requireContext().getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
         }
         return binding.root
+    }
+
+    private fun checkBatteryOptimization() {
+        val packageName = requireContext().packageName
+        val powerManager = requireContext().getSystemService(Context.POWER_SERVICE) as PowerManager
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+            !powerManager.isIgnoringBatteryOptimizations(packageName)) {
+
+            AlertDialog.Builder(requireContext())
+                .setTitle("Battery Optimization")
+                .setMessage("For the timer to work properly when the screen is locked, please disable battery optimization for this app.")
+                .setPositiveButton("Settings") { _, _ ->
+                    openBatteryOptimizationSettings()
+                }
+                .setNegativeButton("Later") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .show()
+        }
+    }
+
+    private fun openBatteryOptimizationSettings() {
+        try {
+            val intent = Intent().apply {
+                action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                data = Uri.parse("package:${requireContext().packageName}")
+            }
+            startActivity(intent)
+        } catch (e: Exception) {
+            // If the above doesn't work, open the general battery optimization settings
+            try {
+                val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
+                startActivity(intent)
+            } catch (e: Exception) {
+                Toast.makeText(
+                    requireContext(),
+                    "Please disable battery optimization for this app in system settings",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 
     private fun setupNotificationChannel() {
@@ -104,8 +194,15 @@ class TimerFragment : Fragment() {
 
     private fun setupButtons() {
         binding.startButton.setOnClickListener {
-            viewModel.startTimer()
-            checkNotificationPermission()
+            // Check battery optimization before starting timer
+            val powerManager = requireContext().getSystemService(Context.POWER_SERVICE) as PowerManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                !powerManager.isIgnoringBatteryOptimizations(requireContext().packageName)) {
+                checkBatteryOptimization()
+            } else {
+                viewModel.startTimer()
+                checkNotificationPermission()
+            }
         }
         binding.stopButton.setOnClickListener { viewModel.stopTimer() }
         binding.resetButton.setOnClickListener { viewModel.resetTimer() }
@@ -131,8 +228,7 @@ class TimerFragment : Fragment() {
 
         viewModel.timerFinished.observe(viewLifecycleOwner) { finished ->
             if (finished) {
-                showNotification()
-                vibrateDevice()
+                // Remove vibrateDevice() call since it's now handled in the service
                 viewModel.onTimerFinishedHandled()
             }
         }
@@ -197,6 +293,7 @@ class TimerFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        requireContext().unbindService(serviceConnection)
         _binding = null
     }
 
