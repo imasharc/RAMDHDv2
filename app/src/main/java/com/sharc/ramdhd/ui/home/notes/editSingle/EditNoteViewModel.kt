@@ -1,7 +1,6 @@
 package com.sharc.ramdhd.ui.home.notes.editSingle
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.sharc.ramdhd.data.database.AppDatabase
@@ -17,7 +16,7 @@ class EditNoteViewModel(application: Application) : AndroidViewModel(application
 
     init {
         val noteDao = AppDatabase.getDatabase(application).noteDao()
-        repository = NoteRepository(noteDao)
+        repository = NoteRepository(noteDao, application)
     }
 
     fun setNoteId(id: Int) {
@@ -42,7 +41,6 @@ class EditNoteViewModel(application: Application) : AndroidViewModel(application
                 )
             }
             repository.insert(note)
-            Log.d("EditNoteViewModel", "Note saved: $note")
         }
     }
 }
