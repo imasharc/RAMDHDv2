@@ -84,7 +84,7 @@ class TimerViewModel : ViewModel() {
     }
 
     fun startTimer() {
-        if (_isRunning.value == true || originalTimeMillis <= 0) return
+        if (_isRunning.value == true) return
         timerService?.startTimer(originalTimeMillis)
     }
 
@@ -93,7 +93,7 @@ class TimerViewModel : ViewModel() {
     }
 
     fun resetTimer() {
-        stopTimer()
+        timerService?.resetTimer()
         hours = 0
         minutes = 0
         seconds = 0
