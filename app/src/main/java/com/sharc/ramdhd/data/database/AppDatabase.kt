@@ -1,16 +1,12 @@
 package com.sharc.ramdhd.data.database
+
 import android.content.Context
 import androidx.room.*
-import com.sharc.ramdhd.data.dao.NoteDao
-import com.sharc.ramdhd.data.dao.RoutineDao
-import com.sharc.ramdhd.data.dao.GraphTaskDao
-import com.sharc.ramdhd.data.model.Note
-import com.sharc.ramdhd.data.model.Routine
-import com.sharc.ramdhd.data.model.Step
+import com.sharc.ramdhd.data.dao.*
+import com.sharc.ramdhd.data.model.*
 import com.sharc.ramdhd.data.model.graphTask.GraphTask
 import com.sharc.ramdhd.data.model.graphTask.GraphStep
 import java.time.LocalDateTime
-import java.time.ZoneId
 
 @Database(
     entities = [
@@ -18,16 +14,30 @@ import java.time.ZoneId
         Routine::class,
         Step::class,
         GraphTask::class,
-        GraphStep::class
+        GraphStep::class,
+        ImportantEvent::class
     ],
-    version = 9,  // Incremented version for new entities
+    version = 10,
     exportSchema = false
 )
-@TypeConverters(Converters::class)
+@TypeConverters(AppDatabase.Converters::class)  // Use the inner Converters class
 abstract class AppDatabase : RoomDatabase() {
     abstract fun noteDao(): NoteDao
     abstract fun routineDao(): RoutineDao
-    abstract fun graphTaskDao(): GraphTaskDao  // Added new DAO
+    abstract fun graphTaskDao(): GraphTaskDao
+    abstract fun importantEventDao(): ImportantEventDao
+
+    class Converters {
+        @TypeConverter
+        fun fromTimestamp(value: String?): LocalDateTime? {
+            return value?.let { LocalDateTime.parse(it) }
+        }
+
+        @TypeConverter
+        fun dateToTimestamp(date: LocalDateTime?): String? {
+            return date?.toString()
+        }
+    }
 
     companion object {
         @Volatile
@@ -40,24 +50,11 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "RAMDHD.db"
                 )
-                    .fallbackToDestructiveMigration() // This will recreate tables if version changes
-                    // For production, you should implement proper migration instead
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
                 instance
             }
         }
-    }
-}
-
-class Converters {
-    @TypeConverter
-    fun fromTimestamp(value: String?): LocalDateTime? {
-        return value?.let { LocalDateTime.parse(it) }
-    }
-
-    @TypeConverter
-    fun dateToTimestamp(date: LocalDateTime?): String? {
-        return date?.toString()
     }
 }
