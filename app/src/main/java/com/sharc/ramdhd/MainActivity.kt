@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
         // menu should be considered as top level destinations.
         appBarConfiguration = AppBarConfiguration(
             setOf(
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications
+                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_people
             )
         )
         setupActionBarWithNavController(navController, appBarConfiguration)
@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
         // Set up bottom navigation behavior
         navView.setOnItemSelectedListener { item ->
             when (item.itemId) {
-                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_notifications -> {
+                R.id.navigation_home, R.id.navigation_dashboard, R.id.navigation_people -> {
                     navController.popBackStack(item.itemId, inclusive = false, saveState = false)
                     navController.navigate(item.itemId)
                     true

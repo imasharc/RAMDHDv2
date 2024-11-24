@@ -27,10 +27,10 @@
         </fragment>
 
         <fragment
-            android:id="@+id/navigation_notifications"
-            android:name="com.sharc.ramdhd.ui.notifications.NotificationsFragment"
+            android:id="@+id/navigation_people"
+            android:name="com.sharc.ramdhd.ui.people.PeopleFragment"
             android:label="People"
-            tools:layout="@layout/fragment_notifications" />
+            tools:layout="@layout/fragment_people" />
 
         <fragment
             android:id="@+id/navigation_dashboard"

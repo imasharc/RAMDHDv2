@@ -14,7 +14,7 @@
         android:contentDescription="Organization" />
 
     <item
-        android:id="@+id/navigation_notifications"
+        android:id="@+id/navigation_people"
         android:icon="@drawable/community"
         android:title="People"
         android:contentDescription="People" />

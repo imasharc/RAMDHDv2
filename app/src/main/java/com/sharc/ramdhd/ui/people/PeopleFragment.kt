@@ -1,4 +1,4 @@
-package com.sharc.ramdhd.ui.notifications
+package com.sharc.ramdhd.ui.people
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,12 +7,12 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import com.sharc.ramdhd.databinding.FragmentNotificationsBinding
+import com.sharc.ramdhd.databinding.FragmentPeopleBinding
 
-class NotificationsFragment : Fragment() {
+class PeopleFragment : Fragment() {
 
-    private var _binding: FragmentNotificationsBinding? = null
-    private val notificationsViewModel: NotificationsViewModel by viewModels()
+    private var _binding: FragmentPeopleBinding? = null
+    private val peopleViewModel: PeopleViewModel by viewModels()
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -23,11 +23,11 @@ class NotificationsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentNotificationsBinding.inflate(inflater, container, false)
+        _binding = FragmentPeopleBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
         val textView: TextView = binding.textNotifications
-        notificationsViewModel.text.observe(viewLifecycleOwner) {
+        peopleViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
         return root

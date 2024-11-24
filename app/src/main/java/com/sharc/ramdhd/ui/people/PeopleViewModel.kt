@@ -1,10 +1,10 @@
-package com.sharc.ramdhd.ui.notifications
+package com.sharc.ramdhd.ui.people
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class NotificationsViewModel : ViewModel() {
+class PeopleViewModel : ViewModel() {
 
     private val _text = MutableLiveData<String>().apply {
         value = "This is notifications Fragment"
