@@ -6,6 +6,9 @@ import com.sharc.ramdhd.data.dao.*
 import com.sharc.ramdhd.data.model.*
 import com.sharc.ramdhd.data.model.graphTask.GraphTask
 import com.sharc.ramdhd.data.model.graphTask.GraphStep
+import com.sharc.ramdhd.data.model.importantPeople.EventType
+import com.sharc.ramdhd.data.model.importantPeople.ImportantEvent
+import com.sharc.ramdhd.data.model.importantPeople.RecurrenceType
 import java.time.LocalDateTime
 
 @Database(
@@ -17,10 +20,10 @@ import java.time.LocalDateTime
         GraphStep::class,
         ImportantEvent::class
     ],
-    version = 10,
+    version = 11,  // Increment version for the new schema
     exportSchema = false
 )
-@TypeConverters(AppDatabase.Converters::class)  // Use the inner Converters class
+@TypeConverters(AppDatabase.Converters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun noteDao(): NoteDao
     abstract fun routineDao(): RoutineDao
@@ -37,6 +40,21 @@ abstract class AppDatabase : RoomDatabase() {
         fun dateToTimestamp(date: LocalDateTime?): String? {
             return date?.toString()
         }
+
+        // Add converters for EventType and RecurrenceType
+        @TypeConverter
+        fun fromEventType(value: EventType): String = value.name
+
+        @TypeConverter
+        fun toEventType(value: String): EventType =
+            EventType.valueOf(value)
+
+        @TypeConverter
+        fun fromRecurrenceType(value: RecurrenceType): String = value.name
+
+        @TypeConverter
+        fun toRecurrenceType(value: String): RecurrenceType =
+            RecurrenceType.valueOf(value)
     }
 
     companion object {

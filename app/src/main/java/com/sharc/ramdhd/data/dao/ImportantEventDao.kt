@@ -1,7 +1,7 @@
 package com.sharc.ramdhd.data.dao
 
 import androidx.room.*
-import com.sharc.ramdhd.data.model.ImportantEvent
+import com.sharc.ramdhd.data.model.importantPeople.ImportantEvent
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDateTime
 

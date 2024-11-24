@@ -1,7 +1,7 @@
 package com.sharc.ramdhd.data.repository
 
 import com.sharc.ramdhd.data.dao.ImportantEventDao
-import com.sharc.ramdhd.data.model.ImportantEvent
+import com.sharc.ramdhd.data.model.importantPeople.ImportantEvent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import java.time.LocalDateTime

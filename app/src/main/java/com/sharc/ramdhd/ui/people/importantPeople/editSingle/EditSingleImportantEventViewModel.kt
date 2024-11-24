@@ -7,11 +7,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.sharc.ramdhd.data.database.AppDatabase
-import com.sharc.ramdhd.data.model.ImportantEvent
+import com.sharc.ramdhd.data.model.importantPeople.EventType
+import com.sharc.ramdhd.data.model.importantPeople.ImportantEvent
+import com.sharc.ramdhd.data.model.importantPeople.RecurrenceType
 import com.sharc.ramdhd.data.repository.ImportantPeopleRepository
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 class EditSingleImportantEventViewModel(application: Application) : AndroidViewModel(application) {
     private val TAG = "ImportantEventVM"
@@ -30,12 +31,16 @@ class EditSingleImportantEventViewModel(application: Application) : AndroidViewM
 
     fun setSelectedDate(year: Int, month: Int, dayOfMonth: Int) {
         _selectedDate.value = LocalDateTime.of(year, month + 1, dayOfMonth, 0, 0)
-        Log.d(TAG, "Selected date: ${_selectedDate.value?.format(DateTimeFormatter.ISO_DATE)}")
     }
 
-    fun saveEvent(personName: String, eventTitle: String, description: String) {
-        if (personName.isBlank() || eventTitle.isBlank() || _selectedDate.value == null) {
-            Log.e(TAG, "Validation failed: personName: $personName, eventTitle: $eventTitle, date: ${_selectedDate.value}")
+    fun saveEvent(
+        personName: String,
+        eventType: EventType,
+        eventName: String,
+        recurrenceType: RecurrenceType,
+        description: String
+    ) {
+        if (personName.isBlank() || eventName.isBlank() || _selectedDate.value == null) {
             _saveStatus.value = false
             return
         }
@@ -44,21 +49,15 @@ class EditSingleImportantEventViewModel(application: Application) : AndroidViewM
             try {
                 val event = ImportantEvent(
                     personName = personName,
-                    eventTitle = eventTitle,
+                    eventType = eventType,
+                    eventName = eventName,
                     eventDate = _selectedDate.value!!,
+                    recurrenceType = recurrenceType,
                     description = description
                 )
 
                 repository.insert(event)
-
-                Log.d(TAG, """
-                    Event saved successfully:
-                    Person: $personName
-                    Title: $eventTitle
-                    Date: ${event.eventDate.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)}
-                    Description: $description
-                """.trimIndent())
-
+                Log.d(TAG, "Event saved successfully: $event")
                 _saveStatus.value = true
             } catch (e: Exception) {
                 Log.e(TAG, "Error saving event", e)
