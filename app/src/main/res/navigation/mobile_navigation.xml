@@ -241,6 +241,20 @@
             android:id="@+id/navigation_important_people_menu"
             android:name="com.sharc.ramdhd.ui.people.importantPeople.ImportantPeopleMenuFragment"
             android:label="Important People"
-            tools:layout="@layout/fragment_important_people_menu" />
+            tools:layout="@layout/fragment_important_people_menu">
+                <action
+                    android:id="@+id/action_navigation_important_people_menu_to_navigation_edit_single_important_event"
+                    app:destination="@id/navigation_edit_single_important_event"
+                    app:enterAnim="@anim/nav_default_enter_anim"
+                    app:exitAnim="@anim/nav_default_exit_anim"
+                    app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+                    app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        </fragment>
+
+        <fragment
+            android:id="@+id/navigation_edit_single_important_event"
+            android:name="com.sharc.ramdhd.ui.people.importantPeople.editSingle.EditSingleImportantEventFragment"
+            android:label="Edit Event"
+            tools:layout="@layout/fragment_edit_single_important_event" />
 
 </navigation>
