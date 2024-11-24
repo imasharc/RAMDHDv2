@@ -29,12 +29,12 @@ class ImportantPeopleRepository(private val importantEventDao: ImportantEventDao
 
     // Insert new event
     suspend fun insert(event: ImportantEvent) {
-        importantEventDao.insert(event)
+        importantEventDao.insert(event.copy(personName = event.personName.trim()))
     }
 
     // Update existing event
     suspend fun update(event: ImportantEvent) {
-        importantEventDao.update(event)
+        importantEventDao.update(event.copy(personName = event.personName.trim()))
     }
 
     // Delete event

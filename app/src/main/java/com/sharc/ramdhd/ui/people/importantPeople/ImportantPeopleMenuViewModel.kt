@@ -35,8 +35,9 @@ class ImportantPeopleMenuViewModel(application: Application) : AndroidViewModel(
     private fun loadEvents() {
         viewModelScope.launch {
             repository.allEvents.collect { eventList ->
-                _events.value = processEvents(eventList)
-                _uniquePersonNames.value = eventList.map { it.personName }.distinct().sorted()
+                val trimmedEvents = eventList.map { it.copy(personName = it.personName.trim()) }
+                _events.value = processEvents(trimmedEvents)
+                _uniquePersonNames.value = trimmedEvents.map { it.personName }.distinct().sorted()
             }
         }
     }
@@ -44,37 +45,41 @@ class ImportantPeopleMenuViewModel(application: Application) : AndroidViewModel(
     private fun processEvents(events: List<ImportantEvent>): List<EventListItem> {
         if (events.isEmpty()) return emptyList()
 
-        return when (_currentFilter.value) {
-            EventFilterType.BY_EVENT_TYPE -> groupByEventType(events)
-            EventFilterType.BY_PERSON -> groupByPerson(events)
-            EventFilterType.THIS_WEEK -> {
-                val filteredEvents = filterThisWeekEvents(events)
-                listOf(EventListItem.HeaderItem("This Week")) +
-                        filteredEvents.map { EventListItem.EventItem(it) }
+        val sortedEvents = when (_currentFilter.value) {
+            EventFilterType.BY_EVENT_TYPE -> events.sortedBy { it.eventType.name }
+            EventFilterType.BY_PERSON -> events.sortedBy { it.personName.trim() }
+            EventFilterType.THIS_WEEK -> filterThisWeekEvents(events).sortedBy { it.eventDate }
+            EventFilterType.THIS_MONTH -> filterThisMonthEvents(events).sortedBy { it.eventDate }
+            else -> events.sortedBy { it.eventDate }
+        }
+
+        // Insert delimiters between different groups
+        return sortedEvents.fold(mutableListOf()) { acc, event ->
+            if (acc.isEmpty() || shouldAddDelimiter(acc.last(), event)) {
+                acc.add(EventListItem.HeaderItem(getHeaderText(event)))
             }
-            EventFilterType.THIS_MONTH -> {
-                val filteredEvents = filterThisMonthEvents(events)
-                listOf(EventListItem.HeaderItem("This Month")) +
-                        filteredEvents.map { EventListItem.EventItem(it) }
-            }
-            else -> groupByEventType(events) // Default grouping
+            acc.add(EventListItem.EventItem(event))
+            acc
         }
     }
 
-    private fun groupByEventType(events: List<ImportantEvent>): List<EventListItem> {
-        return events.groupBy { it.eventType }
-            .flatMap { (type, eventList) ->
-                listOf(EventListItem.HeaderItem(type.toString().capitalize())) +
-                        eventList.map { EventListItem.EventItem(it) }
-            }
+    private fun shouldAddDelimiter(lastItem: EventListItem, newEvent: ImportantEvent): Boolean {
+        val lastEvent = (lastItem as? EventListItem.EventItem)?.event ?: return false
+        return when (_currentFilter.value) {
+            EventFilterType.BY_EVENT_TYPE -> lastEvent.eventType != newEvent.eventType
+            EventFilterType.BY_PERSON -> lastEvent.personName.trim() != newEvent.personName.trim()
+            else -> false
+        }
     }
 
-    private fun groupByPerson(events: List<ImportantEvent>): List<EventListItem> {
-        return events.groupBy { it.personName }
-            .flatMap { (name, eventList) ->
-                listOf(EventListItem.HeaderItem(name)) +
-                        eventList.map { EventListItem.EventItem(it) }
-            }
+    private fun getHeaderText(event: ImportantEvent): String {
+        return when (_currentFilter.value) {
+            EventFilterType.BY_EVENT_TYPE -> event.eventType.toString().lowercase().capitalize()
+            EventFilterType.BY_PERSON -> event.personName.trim()
+            EventFilterType.THIS_WEEK -> "This Week"
+            EventFilterType.THIS_MONTH -> "This Month"
+            else -> ""
+        }
     }
 
     private fun filterThisWeekEvents(events: List<ImportantEvent>): List<ImportantEvent> {
@@ -101,22 +106,29 @@ class ImportantPeopleMenuViewModel(application: Application) : AndroidViewModel(
     }
 
     fun filterByPerson(personName: String) {
+        val trimmedName = personName.trim()
         viewModelScope.launch {
-            repository.getEventsForPerson(personName).collect { events ->
-                _events.value = listOf(EventListItem.HeaderItem(personName)) +
-                        events.map { EventListItem.EventItem(it) }
-            }
+            repository.allEvents
+                .map { events ->
+                    events.filter { it.personName.trim().equals(trimmedName, ignoreCase = true) }
+                        .sortedBy { it.eventDate }
+                }
+                .collect { filteredEvents ->
+                    _events.value = filteredEvents.map { EventListItem.EventItem(it) }
+                }
         }
     }
 
     fun filterByEventType(eventType: EventType) {
         viewModelScope.launch {
-            repository.allEvents.map { events ->
-                events.filter { it.eventType == eventType }
-            }.collect { filteredEvents ->
-                _events.value = listOf(EventListItem.HeaderItem(eventType.toString().capitalize())) +
-                        filteredEvents.map { EventListItem.EventItem(it) }
-            }
+            repository.allEvents
+                .map { events ->
+                    events.filter { it.eventType == eventType }
+                        .sortedBy { it.eventDate }
+                }
+                .collect { filteredEvents ->
+                    _events.value = filteredEvents.map { EventListItem.EventItem(it) }
+                }
         }
     }
 
@@ -124,9 +136,5 @@ class ImportantPeopleMenuViewModel(application: Application) : AndroidViewModel(
         viewModelScope.launch {
             repository.deleteEvents(events)
         }
-    }
-
-    private fun String.capitalize(): String {
-        return this.lowercase().replaceFirstChar { it.uppercase() }
     }
 }

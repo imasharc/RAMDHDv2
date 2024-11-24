@@ -56,6 +56,13 @@ class ImportantPeopleMenuFragment : Fragment(R.layout.fragment_important_people_
     }
 
     private fun setupFilterDropdown() {
+        val filterOptions = EventFilterType.values().map { it.toString() }
+        filterAdapter = ArrayAdapter(
+            requireContext(),
+            R.layout.item_list_event_options,
+            filterOptions
+        )
+
         binding.filterAutoComplete.apply {
             threshold = 1000 // Prevent automatic filtering
             setAdapter(filterAdapter)
@@ -63,8 +70,8 @@ class ImportantPeopleMenuFragment : Fragment(R.layout.fragment_important_people_
 
             setOnClickListener {
                 if (!isPopupShowing) {
-                    clearFocus() // Prevent keyboard from showing
-                    setAdapter(filterAdapter) // Reset adapter
+                    clearFocus()
+                    setAdapter(filterAdapter)
                     showDropDown()
                 }
             }
@@ -77,11 +84,8 @@ class ImportantPeopleMenuFragment : Fragment(R.layout.fragment_important_people_
     }
 
     private fun handleFilterSelection(selectedFilter: EventFilterType) {
-        when (selectedFilter) {
-            EventFilterType.BY_PERSON -> showPersonSelectionDialog()
-            EventFilterType.BY_EVENT_TYPE -> showEventTypeSelectionDialog()
-            else -> viewModel.setFilter(selectedFilter)
-        }
+        // Simply apply the filter directly
+        viewModel.setFilter(selectedFilter)
     }
 
     private fun showPersonSelectionDialog() {
