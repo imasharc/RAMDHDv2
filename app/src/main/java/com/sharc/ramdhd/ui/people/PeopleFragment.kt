@@ -7,6 +7,8 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import com.sharc.ramdhd.R
 import com.sharc.ramdhd.databinding.FragmentPeopleBinding
 
 class PeopleFragment : Fragment() {
@@ -26,10 +28,11 @@ class PeopleFragment : Fragment() {
         _binding = FragmentPeopleBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textNotifications
-        peopleViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
+        // Set click listener for the important people panel
+        binding.importantPeoplePanel.setOnClickListener {
+            findNavController().navigate(R.id.action_navigation_people_to_navigation_important_people_menu)
         }
+
         return root
     }
 

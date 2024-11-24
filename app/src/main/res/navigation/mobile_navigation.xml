@@ -27,12 +27,6 @@
         </fragment>
 
         <fragment
-            android:id="@+id/navigation_people"
-            android:name="com.sharc.ramdhd.ui.people.PeopleFragment"
-            android:label="People"
-            tools:layout="@layout/fragment_people" />
-
-        <fragment
             android:id="@+id/navigation_dashboard"
             android:name="com.sharc.ramdhd.ui.dashboard.DashboardFragment"
             android:label="Organization"
@@ -228,5 +222,25 @@
                     app:nullable="true"
                     android:defaultValue="@null" />
         </fragment>
+
+        <fragment
+            android:id="@+id/navigation_people"
+            android:name="com.sharc.ramdhd.ui.people.PeopleFragment"
+            android:label="People"
+            tools:layout="@layout/fragment_people">
+                <action
+                    android:id="@+id/action_navigation_people_to_navigation_important_people_menu"
+                    app:destination="@id/navigation_important_people_menu"
+                    app:enterAnim="@anim/nav_default_enter_anim"
+                    app:exitAnim="@anim/nav_default_exit_anim"
+                    app:popEnterAnim="@anim/nav_default_pop_enter_anim"
+                    app:popExitAnim="@anim/nav_default_pop_exit_anim" />
+        </fragment>
+
+        <fragment
+            android:id="@+id/navigation_important_people_menu"
+            android:name="com.sharc.ramdhd.ui.people.importantPeople.ImportantPeopleMenuFragment"
+            android:label="Important People"
+            tools:layout="@layout/fragment_important_people_menu" />
 
 </navigation>
