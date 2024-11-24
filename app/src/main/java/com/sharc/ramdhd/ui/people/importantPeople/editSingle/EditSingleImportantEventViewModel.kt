@@ -8,14 +8,19 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.sharc.ramdhd.data.database.AppDatabase
 import com.sharc.ramdhd.data.model.ImportantEvent
+import com.sharc.ramdhd.data.repository.ImportantPeopleRepository
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class EditSingleImportantEventViewModel(application: Application) : AndroidViewModel(application) {
     private val TAG = "ImportantEventVM"
-    private val database = AppDatabase.getDatabase(application)
-    private val importantEventDao = database.importantEventDao()
+    private val repository: ImportantPeopleRepository
+
+    init {
+        val database = AppDatabase.getDatabase(application)
+        repository = ImportantPeopleRepository(database.importantEventDao())
+    }
 
     private val _selectedDate = MutableLiveData<LocalDateTime>()
     val selectedDate: LiveData<LocalDateTime> = _selectedDate
@@ -36,17 +41,16 @@ class EditSingleImportantEventViewModel(application: Application) : AndroidViewM
         }
 
         viewModelScope.launch {
-            val event = ImportantEvent(
-                personName = personName,
-                eventTitle = eventTitle,
-                eventDate = _selectedDate.value!!,
-                description = description
-            )
-
             try {
-                importantEventDao.insert(event)
+                val event = ImportantEvent(
+                    personName = personName,
+                    eventTitle = eventTitle,
+                    eventDate = _selectedDate.value!!,
+                    description = description
+                )
 
-                // Log the saved event details
+                repository.insert(event)
+
                 Log.d(TAG, """
                     Event saved successfully:
                     Person: $personName
@@ -54,20 +58,6 @@ class EditSingleImportantEventViewModel(application: Application) : AndroidViewM
                     Date: ${event.eventDate.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)}
                     Description: $description
                 """.trimIndent())
-
-                // Log all events in the database using the new suspend function
-                val allEvents = importantEventDao.getAllEventsList()
-                Log.d(TAG, "All events in database (${allEvents.size} total):")
-                allEvents.forEach { savedEvent ->
-                    Log.d(TAG, """
-                        ID: ${savedEvent.id}
-                        Person: ${savedEvent.personName}
-                        Title: ${savedEvent.eventTitle}
-                        Date: ${savedEvent.eventDate.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)}
-                        Description: ${savedEvent.description}
-                        ------------------------
-                    """.trimIndent())
-                }
 
                 _saveStatus.value = true
             } catch (e: Exception) {
