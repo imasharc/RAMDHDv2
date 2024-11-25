@@ -16,6 +16,9 @@
         <item name="android:textSize">14sp</item>
         <item name="textAllCaps">false</item>
         <item name="android:textAllCaps">false</item>
+
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowBackground">@android:color/white</item>
     </style>
 
     <!-- Add this new style -->

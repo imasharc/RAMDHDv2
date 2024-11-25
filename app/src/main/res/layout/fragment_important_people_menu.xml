@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.people.importantPeople.ImportantPeopleMenuFragment">
 
     <com.google.android.material.appbar.AppBarLayout
@@ -12,8 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@android:color/transparent"
-        android:elevation="0dp"
-        app:layout_constraintTop_toTopOf="parent">
+        android:elevation="0dp">
 
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
@@ -21,55 +20,48 @@
             android:layout_margin="8dp"
             app:cardElevation="2dp">
 
-            <LinearLayout
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/filter_dropdown"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:padding="8dp">
+                android:hint="Filter events">
 
-                <com.google.android.material.textfield.TextInputLayout
-                    android:id="@+id/filter_dropdown"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                <AutoCompleteTextView
+                    android:id="@+id/filter_auto_complete"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Filter events">
+                    android:inputType="none"/>
 
-                    <AutoCompleteTextView
-                        android:id="@+id/filter_auto_complete"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:inputType="none"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
-                </com.google.android.material.textfield.TextInputLayout>
-            </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/events_recycler_view"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toBottomOf="@id/app_bar_layout"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:padding="4dp"
-        android:clipToPadding="false"/>
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:paddingBottom="88dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/add_new_event_fab"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="70dp"
+        android:layout_margin="16dp"
         android:contentDescription="Add new event"
         app:srcCompat="@drawable/plus_circle"
         app:fabCustomSize="70dp"
         app:maxImageSize="70dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_anchor="@id/events_recycler_view"
+        app:layout_anchorGravity="bottom|end"
         app:backgroundTint="@android:color/white"
         android:tint="#00ff00"
         app:tint="@null"
         app:elevation="6dp"
-        app:rippleColor="@null" />
+        app:rippleColor="@null"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

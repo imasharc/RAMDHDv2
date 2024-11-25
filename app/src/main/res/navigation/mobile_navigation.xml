@@ -255,6 +255,36 @@
             android:id="@+id/navigation_edit_single_important_event"
             android:name="com.sharc.ramdhd.ui.people.importantPeople.editSingle.EditSingleImportantEventFragment"
             android:label="Edit Event"
-            tools:layout="@layout/fragment_edit_single_important_event" />
+            tools:layout="@layout/fragment_edit_single_important_event">
+                <argument
+                    android:name="eventId"
+                    app:argType="integer"
+                    android:defaultValue="-1" />
+                <argument
+                    android:name="personName"
+                    app:argType="string"
+                    app:nullable="true"
+                    android:defaultValue="@null" />
+                <argument
+                    android:name="eventType"
+                    app:argType="string"
+                    app:nullable="true"
+                    android:defaultValue="@null" />
+                <argument
+                    android:name="eventName"
+                    app:argType="string"
+                    app:nullable="true"
+                    android:defaultValue="@null" />
+                <argument
+                    android:name="eventDate"
+                    app:argType="string"
+                    app:nullable="true"
+                    android:defaultValue="@null" />
+                <argument
+                    android:name="description"
+                    app:argType="string"
+                    app:nullable="true"
+                    android:defaultValue="@null" />
+        </fragment>
 
 </navigation>
