@@ -137,10 +137,34 @@ class ImportantPeopleMenuFragment : Fragment(R.layout.fragment_important_people_
     }
 
     private fun setupClickListeners() {
+        // FAB for creating new event
         binding.addNewEventFab.setOnClickListener {
-            findNavController().navigate(
-                R.id.action_navigation_important_people_menu_to_navigation_edit_single_important_event
-            )
+            val action = ImportantPeopleMenuFragmentDirections
+                .actionNavigationImportantPeopleMenuToNavigationEditSingleImportantEvent(
+                    eventId = -1,
+                    personName = null,
+                    eventType = null,
+                    eventName = null,
+                    eventDate = null,
+                    description = null
+                )
+            findNavController().navigate(action)
+        }
+
+        // For editing existing events
+        eventAdapter.setOnItemClickListener { event ->
+            if (!eventAdapter.isInSelectionMode()) {
+                val action = ImportantPeopleMenuFragmentDirections
+                    .actionNavigationImportantPeopleMenuToNavigationEditSingleImportantEvent(
+                        eventId = event.id,
+                        personName = event.personName,
+                        eventType = event.eventType.name,
+                        eventName = event.eventName,
+                        eventDate = event.eventDate.toString(),
+                        description = event.description
+                    )
+                findNavController().navigate(action)
+            }
         }
     }
 
