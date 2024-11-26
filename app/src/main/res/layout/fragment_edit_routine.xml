@@ -1,61 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingBottom="64dp"
     tools:context=".ui.dashboard.routines.editSingle.EditRoutineFragment">
 
-    <ScrollView
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_height="match_parent"
         android:fillViewport="true"
         android:paddingTop="16dp"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
-        android:paddingBottom="4dp">
+        android:paddingBottom="88dp"
+        android:clipToPadding="false"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <EditText
-                android:id="@+id/titleInput"
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Title"
-                android:inputType="text"
-                android:maxLines="1"
-                android:minHeight="48dp"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                android:importantForAutofill="yes"
-                android:autofillHints="name" />
+                android:layout_marginBottom="16dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
 
-            <EditText
-                android:id="@+id/descriptionInput"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:hint="Description"
-                android:inputType="textMultiLine"
-                android:minLines="1"
-                android:minHeight="48dp"
-                android:gravity="top"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
-                android:importantForAutofill="yes"
-                android:autofillHints="description" />
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/titleInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Title"
+                    android:inputType="text"
+                    android:maxLines="1"
+                    android:importantForAutofill="yes"
+                    android:autofillHints="name" />
+            </com.google.android.material.textfield.TextInputLayout>
 
-            <TextView
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/descriptionInput"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Description"
+                    android:inputType="textMultiLine"
+                    android:minLines="1"
+                    android:gravity="top"
+                    android:importantForAutofill="yes"
+                    android:autofillHints="description" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textview.MaterialTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
                 android:text="Steps"
-                android:textStyle="bold"/>
+                android:textStyle="bold"
+                android:textAppearance="?attr/textAppearanceSubtitle1"/>
 
             <LinearLayout
                 android:id="@+id/stepsContainer"
@@ -64,15 +73,25 @@
                 android:orientation="vertical"/>
 
         </LinearLayout>
-    </ScrollView>
 
-    <Button
+    </androidx.core.widget.NestedScrollView>
+
+    <com.google.android.material.button.MaterialButton
         android:id="@+id/saveButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="4dp"
-        android:minWidth="48dp"
-        android:minHeight="48dp"
-        android:text="Save"/>
+        android:layout_margin="16dp"
+        android:text="Save"
+        android:textAllCaps="false"
+        android:padding="12dp"
+        app:layout_anchor="@id/saveButtonBarrier"
+        app:layout_anchorGravity="bottom"
+        style="@style/Widget.MaterialComponents.Button"/>
 
-</LinearLayout>
+    <Space
+        android:id="@+id/saveButtonBarrier"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"/>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

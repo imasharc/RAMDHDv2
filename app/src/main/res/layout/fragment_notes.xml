@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -8,68 +9,65 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerViewNotes"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:clipToPadding="false"
-        android:paddingBottom="116dp"
+        android:paddingBottom="88dp"
         android:scrollbars="vertical"
         android:fadeScrollbars="true"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabDelete"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="20dp"
+        android:layout_gravity="bottom|end"
+        android:orientation="vertical"
         android:layout_marginBottom="16dp"
-        android:contentDescription="Delete selected notes"
-        android:visibility="gone"
-        app:srcCompat="@drawable/baseline_delete_24"
-        app:fabCustomSize="70dp"
-        app:maxImageSize="40dp"
-        app:layout_constraintBottom_toTopOf="@id/fabSelectAll"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:backgroundTint="@android:color/white"
-        app:tint="#FF5252"
-        app:elevation="6dp"
-        app:rippleColor="@null" />
+        android:layout_marginEnd="16dp">
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/myImageView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="70dp"
-        android:contentDescription="Add new note"
-        app:srcCompat="@drawable/undraw_add_files_re_v09g"
-        app:fabCustomSize="70dp"
-        app:maxImageSize="70dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:backgroundTint="@android:color/white"
-        app:tint="@null"
-        app:elevation="6dp"
-        app:rippleColor="@null" />
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabDelete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:contentDescription="Delete selected notes"
+            android:visibility="gone"
+            app:srcCompat="@drawable/baseline_delete_24"
+            app:fabCustomSize="70dp"
+            app:maxImageSize="40dp"
+            app:backgroundTint="@android:color/white"
+            app:tint="#FF5252"
+            app:elevation="6dp"
+            app:rippleColor="@null" />
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/fabSelectAll"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="70dp"
-        android:contentDescription="Select all notes"
-        android:visibility="gone"
-        app:srcCompat="@drawable/baseline_select_all_24"
-        app:fabCustomSize="70dp"
-        app:maxImageSize="50dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:backgroundTint="@android:color/white"
-        app:tint="@null"
-        app:elevation="6dp"
-        app:rippleColor="@null" />
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabSelectAll"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:contentDescription="Select all notes"
+            android:visibility="gone"
+            app:srcCompat="@drawable/baseline_select_all_24"
+            app:fabCustomSize="70dp"
+            app:maxImageSize="50dp"
+            app:backgroundTint="@android:color/white"
+            app:tint="@null"
+            app:elevation="6dp"
+            app:rippleColor="@null" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/myImageView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="Add new note"
+            app:srcCompat="@drawable/undraw_add_files_re_v09g"
+            app:fabCustomSize="70dp"
+            app:maxImageSize="70dp"
+            app:backgroundTint="@android:color/white"
+            app:tint="@null"
+            app:elevation="6dp"
+            app:rippleColor="@null" />
+
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

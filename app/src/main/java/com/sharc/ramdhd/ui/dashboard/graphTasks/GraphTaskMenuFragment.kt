@@ -59,9 +59,10 @@ class GraphTaskMenuFragment : Fragment(R.layout.fragment_graph_task_menu) {
 
     private fun updateFabVisibility(selectedCount: Int) {
         binding.apply {
-            val isVisible = selectedCount > 0
-            fabDelete.visibility = if (isVisible) View.VISIBLE else View.GONE
-            fabSelectAll.visibility = if (isVisible) View.VISIBLE else View.GONE
+            val isInSelectionMode = selectedCount > 0
+            fabDelete.visibility = if (isInSelectionMode) View.VISIBLE else View.GONE
+            fabSelectAll.visibility = if (isInSelectionMode) View.VISIBLE else View.GONE
+            addNewGraphTask.visibility = if (isInSelectionMode) View.GONE else View.VISIBLE
 
             // Update select/deselect FAB icon and contentDescription
             if (adapter.isAllSelected()) {
