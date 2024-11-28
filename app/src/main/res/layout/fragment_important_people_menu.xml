@@ -34,9 +34,7 @@
                     android:inputType="none"/>
 
             </com.google.android.material.textfield.TextInputLayout>
-
         </com.google.android.material.card.MaterialCardView>
-
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -47,21 +45,58 @@
         android:paddingBottom="88dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior"/>
 
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/add_new_event_fab"
+    <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:contentDescription="Add new event"
-        app:srcCompat="@drawable/plus_circle"
-        app:fabCustomSize="70dp"
-        app:maxImageSize="70dp"
-        app:layout_anchor="@id/events_recycler_view"
-        app:layout_anchorGravity="bottom|end"
-        app:backgroundTint="@android:color/white"
-        android:tint="#00ff00"
-        app:tint="@null"
-        app:elevation="6dp"
-        app:rippleColor="@null"/>
+        android:layout_gravity="bottom|end"
+        android:orientation="vertical"
+        android:layout_marginEnd="16dp">
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_delete"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:contentDescription="Delete selected events"
+            android:visibility="gone"
+            app:srcCompat="@drawable/baseline_delete_24"
+            app:fabCustomSize="70dp"
+            app:maxImageSize="40dp"
+            app:backgroundTint="@android:color/white"
+            app:tint="#FF5252"
+            app:elevation="6dp"
+            app:rippleColor="@null" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fab_select_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:contentDescription="Select all events"
+            android:visibility="gone"
+            app:srcCompat="@drawable/baseline_select_all_24"
+            app:fabCustomSize="70dp"
+            app:maxImageSize="50dp"
+            app:backgroundTint="@android:color/white"
+            app:tint="@null"
+            app:elevation="6dp"
+            app:rippleColor="@null" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/add_new_event_fab"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:contentDescription="Add new event"
+            app:srcCompat="@drawable/plus_circle"
+            app:fabCustomSize="70dp"
+            app:maxImageSize="70dp"
+            app:backgroundTint="@android:color/white"
+            android:tint="#00ff00"
+            app:tint="@null"
+            app:elevation="6dp"
+            app:rippleColor="@null"/>
+
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
