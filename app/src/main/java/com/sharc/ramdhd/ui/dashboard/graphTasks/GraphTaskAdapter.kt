@@ -108,7 +108,6 @@ class GraphTaskAdapter : ListAdapter<GraphTaskWithSteps, GraphTaskAdapter.GraphT
 
                 // Handle completed state
                 if (graphTask.task.isCompleted) {
-                    // Change the entire card background to green
                     root.setCardBackgroundColor(
                         ContextCompat.getColor(root.context, android.R.color.holo_green_light)
                     )
@@ -119,7 +118,6 @@ class GraphTaskAdapter : ListAdapter<GraphTaskWithSteps, GraphTaskAdapter.GraphT
                         ContextCompat.getColor(root.context, android.R.color.darker_gray)
                     )
                 } else {
-                    // Reset to default colors
                     root.setCardBackgroundColor(
                         ContextCompat.getColor(root.context, android.R.color.white)
                     )
@@ -141,7 +139,7 @@ class GraphTaskAdapter : ListAdapter<GraphTaskWithSteps, GraphTaskAdapter.GraphT
                     textViewGraphTaskDate.text = graphTask.task.timestamp.toString()
                 }
 
-                // Handle selection mode
+                // Handle checkbox visibility with animation
                 if (isSelectionMode) {
                     checkBoxGraphTask.alpha = 0f
                     checkBoxGraphTask.visibility = View.VISIBLE

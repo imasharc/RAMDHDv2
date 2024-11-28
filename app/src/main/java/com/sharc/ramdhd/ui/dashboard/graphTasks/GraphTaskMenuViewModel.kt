@@ -20,7 +20,7 @@ class GraphTaskMenuViewModel(application: Application) : AndroidViewModel(applic
     }
 
     // Update to handle List<GraphTask>
-    suspend fun deleteGraphTasks(tasks: Set<GraphTaskWithSteps>) {
+    suspend fun deleteGraphTasks(tasks: List<GraphTaskWithSteps>) {
         // Convert Set<GraphTaskWithSteps> to List<GraphTask>
         val graphTasks = tasks.map { it.task }
         repository.delete(graphTasks)

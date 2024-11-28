@@ -3,10 +3,12 @@ package com.sharc.ramdhd.ui.dashboard.graphTasks
 import android.os.Bundle
 import android.util.Log
 import android.view.View
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
@@ -24,6 +26,7 @@ class GraphTaskMenuFragment : Fragment(R.layout.fragment_graph_task_menu) {
     private val binding get() = _binding!!
     private val viewModel: GraphTaskMenuViewModel by viewModels()
     private lateinit var adapter: GraphTaskAdapter
+    private var isAllSelected = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -32,6 +35,7 @@ class GraphTaskMenuFragment : Fragment(R.layout.fragment_graph_task_menu) {
         setupRecyclerView()
         setupClickListeners()
         observeGraphTasks()
+        setupBackPressHandler()
     }
 
     private fun setupRecyclerView() {
@@ -40,38 +44,39 @@ class GraphTaskMenuFragment : Fragment(R.layout.fragment_graph_task_menu) {
             adapter = this@GraphTaskMenuFragment.adapter
             layoutManager = LinearLayoutManager(requireContext())
             setHasFixedSize(true)
+            itemAnimator = DefaultItemAnimator()
         }
 
         adapter.setOnItemClickListener { graphTask ->
-            Log.d(TAG, "Navigating to task with ID: ${graphTask.task.id}")
-            findNavController().navigate(
-                GraphTaskMenuFragmentDirections
-                    .actionNavigationGraphTaskMenuToNavigationViewSingleGraphTask(
-                        taskId = graphTask.task.id
-                    )
-            )
+            if (!adapter.isInSelectionMode()) {
+                Log.d(TAG, "Navigating to task with ID: ${graphTask.task.id}")
+                findNavController().navigate(
+                    GraphTaskMenuFragmentDirections
+                        .actionNavigationGraphTaskMenuToNavigationViewSingleGraphTask(
+                            taskId = graphTask.task.id
+                        )
+                )
+            }
+        }
+
+        adapter.setOnItemLongClickListener { _ ->
+            // Enter selection mode
+            binding.addNewGraphTask.visibility = View.GONE
+            binding.fabSelectAll.visibility = View.VISIBLE
+            binding.fabDelete.visibility = View.VISIBLE
+            isAllSelected = false
+            binding.fabSelectAll.setImageResource(R.drawable.baseline_select_all_24)
         }
 
         adapter.setOnSelectionChangedListener { selectedCount ->
-            updateFabVisibility(selectedCount)
-        }
-    }
-
-    private fun updateFabVisibility(selectedCount: Int) {
-        binding.apply {
-            val isInSelectionMode = selectedCount > 0
-            fabDelete.visibility = if (isInSelectionMode) View.VISIBLE else View.GONE
-            fabSelectAll.visibility = if (isInSelectionMode) View.VISIBLE else View.GONE
-            addNewGraphTask.visibility = if (isInSelectionMode) View.GONE else View.VISIBLE
-
-            // Update select/deselect FAB icon and contentDescription
-            if (adapter.isAllSelected()) {
-                fabSelectAll.setImageResource(R.drawable.baseline_deselect_24)
-                fabSelectAll.contentDescription = "Deselect all graph tasks"
-            } else {
-                fabSelectAll.setImageResource(R.drawable.baseline_select_all_24)
-                fabSelectAll.contentDescription = "Select all graph tasks"
+            if (selectedCount == 0 && adapter.isInSelectionMode()) {
+                exitSelectionMode()
             }
+            isAllSelected = adapter.isAllSelected()
+            binding.fabSelectAll.setImageResource(
+                if (isAllSelected) R.drawable.baseline_deselect_24
+                else R.drawable.baseline_select_all_24
+            )
         }
     }
 
@@ -83,10 +88,14 @@ class GraphTaskMenuFragment : Fragment(R.layout.fragment_graph_task_menu) {
         }
 
         binding.fabSelectAll.setOnClickListener {
-            if (adapter.isAllSelected()) {
+            if (isAllSelected) {
                 adapter.deselectAllTasks()
+                isAllSelected = false
+                binding.fabSelectAll.setImageResource(R.drawable.baseline_select_all_24)
             } else {
                 adapter.selectAllTasks()
+                isAllSelected = true
+                binding.fabSelectAll.setImageResource(R.drawable.baseline_deselect_24)
             }
         }
 
@@ -97,36 +106,27 @@ class GraphTaskMenuFragment : Fragment(R.layout.fragment_graph_task_menu) {
 
     private fun showDeleteConfirmationDialog() {
         val selectedTasks = adapter.getSelectedTasks()
-        val taskCount = selectedTasks.size
+        if (selectedTasks.isEmpty()) return
 
         MaterialAlertDialogBuilder(requireContext())
             .setTitle("Delete Graph Tasks")
-            .setMessage("Are you sure you want to delete $taskCount selected task${if (taskCount > 1) "s" else ""}?")
-            .setPositiveButton("Delete") { _, _ ->
+            .setMessage("Are you sure you want to delete ${selectedTasks.size} selected task${if (selectedTasks.size > 1) "s" else ""}?")
+            .setPositiveButton("Delete") { dialog, _ ->
                 deleteSelectedTasks()
+                dialog.dismiss()
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton("Cancel") { dialog, _ ->
+                dialog.dismiss()
+            }
             .show()
     }
 
     private fun deleteSelectedTasks() {
-        val selectedTasks = adapter.getSelectedTasks()
-
+        val selectedTasks = adapter.getSelectedTasks().toList()
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 viewModel.deleteGraphTasks(selectedTasks)
-
-                // Show success message
-                Snackbar.make(
-                    binding.root,
-                    "Successfully deleted ${selectedTasks.size} task${if (selectedTasks.size > 1) "s" else ""}",
-                    Snackbar.LENGTH_SHORT
-                ).show()
-
-                // Exit selection mode and update FAB visibility
-                adapter.toggleSelectionMode()
-                updateFabVisibility(0)
-
+                exitSelectionMode()
             } catch (e: Exception) {
                 Log.e(TAG, "Error deleting tasks", e)
                 Snackbar.make(
@@ -138,29 +138,45 @@ class GraphTaskMenuFragment : Fragment(R.layout.fragment_graph_task_menu) {
         }
     }
 
+    private fun setupBackPressHandler() {
+        val callback = object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (adapter.isInSelectionMode()) {
+                    exitSelectionMode()
+                } else {
+                    isEnabled = false
+                    requireActivity().onBackPressed()
+                }
+            }
+        }
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
+    }
+
+    private fun exitSelectionMode() {
+        adapter.toggleSelectionMode()
+        binding.addNewGraphTask.visibility = View.VISIBLE
+        binding.fabSelectAll.visibility = View.GONE
+        binding.fabDelete.visibility = View.GONE
+    }
+
     private fun observeGraphTasks() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.allGraphTasks.collectLatest { tasks ->
-                // Log the tasks
+                // Sort tasks by timestamp if needed
+                val sortedTasks = tasks.sortedByDescending { it.task.timestamp }
+                adapter.submitList(sortedTasks)
+
+                // Log for debugging
                 Log.d(TAG, "Current graph tasks (${tasks.size} total):")
-                tasks.forEachIndexed { index, taskWithSteps ->
+                sortedTasks.forEachIndexed { index, taskWithSteps ->
                     Log.d(TAG, """
                         Task ${index + 1}:
                         ID: ${taskWithSteps.task.id}
                         Title: ${taskWithSteps.task.title}
-                        Description: ${taskWithSteps.task.description}
-                        Steps (${taskWithSteps.steps.size}):
-                        ${taskWithSteps.steps.joinToString("\n") {
-                        "- ${it.description} " +
-                                "(Finishing: ${it.isFinishing}, " +
-                                "Gratification: ${it.isGratification})"
-                    }}
+                        Steps: ${taskWithSteps.steps.size}
                         ----------------------------------------
                     """.trimIndent())
                 }
-
-                // Update the UI
-                adapter.submitList(tasks)
             }
         }
     }
