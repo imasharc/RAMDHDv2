@@ -22,7 +22,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:orientation="vertical"
-        android:layout_marginBottom="16dp"
         android:layout_marginEnd="16dp">
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -59,6 +58,7 @@
             android:id="@+id/myImageView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             android:contentDescription="Add new note"
             app:srcCompat="@drawable/undraw_add_files_re_v09g"
             app:fabCustomSize="70dp"
