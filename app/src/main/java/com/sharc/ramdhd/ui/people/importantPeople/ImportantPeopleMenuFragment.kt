@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
 import android.widget.AutoCompleteTextView
-import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -21,7 +20,6 @@ class ImportantPeopleMenuFragment : Fragment(R.layout.fragment_important_people_
     private val viewModel: ImportantPeopleMenuViewModel by viewModels()
     private lateinit var eventAdapter: ImportantEventAdapter
     private lateinit var filterAdapter: ArrayAdapter<String>
-    private var isAllSelected = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -31,8 +29,6 @@ class ImportantPeopleMenuFragment : Fragment(R.layout.fragment_important_people_
         setupRecyclerView()
         setupFilterDropdown()
         setupClickListeners()
-        setupSelectionModeListeners()
-        setupBackPressHandler()
         observeViewModel()
     }
 
@@ -52,20 +48,10 @@ class ImportantPeopleMenuFragment : Fragment(R.layout.fragment_important_people_
             setHasFixedSize(true)
         }
 
-        // For editing existing events
         eventAdapter.setOnItemClickListener { event ->
-            if (!eventAdapter.isInSelectionMode()) {
-                val action = ImportantPeopleMenuFragmentDirections
-                    .actionNavigationImportantPeopleMenuToNavigationEditSingleImportantEvent(
-                        eventId = event.id,
-                        personName = event.personName,
-                        eventType = event.eventType.name,
-                        eventName = event.eventName,
-                        eventDate = event.eventDate.toString(),
-                        description = event.description
-                    )
-                findNavController().navigate(action)
-            }
+            val action = ImportantPeopleMenuFragmentDirections
+                .actionNavigationImportantPeopleMenuToNavigationEditSingleImportantEvent()
+            findNavController().navigate(action)
         }
     }
 
@@ -91,21 +77,15 @@ class ImportantPeopleMenuFragment : Fragment(R.layout.fragment_important_people_
             }
 
             setOnItemClickListener { _, _, position, _ ->
-                val selectedFilter = EventFilterType.values()[position]
-                handleFilterSelection(selectedFilter)
+                // Just apply the filter directly, no dialog needed
+                viewModel.setFilter(EventFilterType.values()[position])
             }
         }
     }
 
     private fun handleFilterSelection(selectedFilter: EventFilterType) {
-        when (selectedFilter) {
-            EventFilterType.BY_PERSON -> showPersonSelectionDialog()
-            EventFilterType.BY_EVENT_TYPE -> showEventTypeSelectionDialog()
-            else -> {
-                viewModel.setFilter(selectedFilter)
-                binding.filterAutoComplete.setText(selectedFilter.toString(), false)
-            }
-        }
+        // Simply apply the filter directly
+        viewModel.setFilter(selectedFilter)
     }
 
     private fun showPersonSelectionDialog() {
@@ -146,6 +126,16 @@ class ImportantPeopleMenuFragment : Fragment(R.layout.fragment_important_people_
         viewModel.setFilter(EventFilterType.ALL)
     }
 
+    override fun onResume() {
+        super.onResume()
+        binding.filterAutoComplete.apply {
+            setAdapter(null) // Clear the old adapter
+            setAdapter(filterAdapter) // Set it again
+            setText(EventFilterType.ALL.toString(), false)
+        }
+        viewModel.setFilter(EventFilterType.ALL)
+    }
+
     private fun setupClickListeners() {
         // FAB for creating new event
         binding.addNewEventFab.setOnClickListener {
@@ -160,91 +150,22 @@ class ImportantPeopleMenuFragment : Fragment(R.layout.fragment_important_people_
                 )
             findNavController().navigate(action)
         }
-    }
 
-    private fun setupSelectionModeListeners() {
-        // Handle long-click selection mode
-        eventAdapter.setOnItemLongClickListener { event ->
-            binding.addNewEventFab.visibility = View.GONE
-            binding.fabSelectAll.visibility = View.VISIBLE
-            binding.fabDelete.visibility = View.VISIBLE
-            isAllSelected = false
-            binding.fabSelectAll.setImageResource(R.drawable.baseline_select_all_24)
-        }
-
-        // Handle selection changes
-        eventAdapter.setOnSelectionChangedListener { selectedCount ->
-            if (selectedCount == 0 && eventAdapter.isInSelectionMode()) {
-                exitSelectionMode()
-            }
-            isAllSelected = eventAdapter.isAllSelected()
-            binding.fabSelectAll.setImageResource(
-                if (isAllSelected) R.drawable.baseline_deselect_24
-                else R.drawable.baseline_select_all_24
-            )
-        }
-
-        // Handle select all button
-        binding.fabSelectAll.setOnClickListener {
-            if (isAllSelected) {
-                eventAdapter.deselectAllEvents()
-                isAllSelected = false
-                binding.fabSelectAll.setImageResource(R.drawable.baseline_select_all_24)
-            } else {
-                eventAdapter.selectAllEvents()
-                isAllSelected = true
-                binding.fabSelectAll.setImageResource(R.drawable.baseline_deselect_24)
+        // For editing existing events
+        eventAdapter.setOnItemClickListener { event ->
+            if (!eventAdapter.isInSelectionMode()) {
+                val action = ImportantPeopleMenuFragmentDirections
+                    .actionNavigationImportantPeopleMenuToNavigationEditSingleImportantEvent(
+                        eventId = event.id,
+                        personName = event.personName,
+                        eventType = event.eventType.name,
+                        eventName = event.eventName,
+                        eventDate = event.eventDate.toString(),
+                        description = event.description
+                    )
+                findNavController().navigate(action)
             }
         }
-
-        // Handle delete button
-        binding.fabDelete.setOnClickListener {
-            showDeleteConfirmationDialog()
-        }
-    }
-
-    private fun showDeleteConfirmationDialog() {
-        val selectedEvents = eventAdapter.getSelectedEvents()
-        if (selectedEvents.isEmpty()) return
-
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Delete Events")
-            .setMessage("Are you sure you want to delete ${selectedEvents.size} selected events?")
-            .setPositiveButton("Delete") { dialog, _ ->
-                deleteSelectedEvents()
-                dialog.dismiss()
-            }
-            .setNegativeButton("Cancel") { dialog, _ ->
-                dialog.dismiss()
-            }
-            .show()
-    }
-
-    private fun deleteSelectedEvents() {
-        val selectedEvents = eventAdapter.getSelectedEvents().toList()
-        viewModel.deleteEvents(selectedEvents)
-        exitSelectionMode()
-    }
-
-    private fun exitSelectionMode() {
-        eventAdapter.toggleSelectionMode()
-        binding.addNewEventFab.visibility = View.VISIBLE
-        binding.fabSelectAll.visibility = View.GONE
-        binding.fabDelete.visibility = View.GONE
-    }
-
-    private fun setupBackPressHandler() {
-        val callback = object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (eventAdapter.isInSelectionMode()) {
-                    exitSelectionMode()
-                } else {
-                    isEnabled = false
-                    requireActivity().onBackPressed()
-                }
-            }
-        }
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, callback)
     }
 
     private fun observeViewModel() {
@@ -255,16 +176,6 @@ class ImportantPeopleMenuFragment : Fragment(R.layout.fragment_important_people_
         viewModel.uniquePersonNames.observe(viewLifecycleOwner) { names ->
             // Update person names if needed
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        binding.filterAutoComplete.apply {
-            setAdapter(null) // Clear the old adapter
-            setAdapter(filterAdapter) // Set it again
-            setText(EventFilterType.ALL.toString(), false)
-        }
-        viewModel.setFilter(EventFilterType.ALL)
     }
 
     override fun onDestroyView() {
