@@ -1,6 +1,7 @@
 package com.sharc.ramdhd.ui.people.importantPeople.editSingle
 
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.ArrayAdapter
 import androidx.fragment.app.Fragment
@@ -13,6 +14,15 @@ import com.sharc.ramdhd.data.model.importantPeople.RecurrenceType
 import com.sharc.ramdhd.databinding.FragmentEditSingleImportantEventBinding
 import java.time.LocalDateTime
 import java.time.ZoneId
+import android.util.TypedValue
+import android.view.ViewGroup
+import android.widget.CalendarView
+import android.widget.NumberPicker
+import android.widget.TextView
+import androidx.core.content.ContextCompat
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import java.util.Calendar
+import java.util.Locale
 
 class EditSingleImportantEventFragment : Fragment(R.layout.fragment_edit_single_important_event) {
     private var _binding: FragmentEditSingleImportantEventBinding? = null
@@ -34,25 +44,89 @@ class EditSingleImportantEventFragment : Fragment(R.layout.fragment_edit_single_
     private fun setupCalendarView() {
         binding.calendarView.setOnDateChangeListener { _, year, month, dayOfMonth ->
             viewModel.setSelectedDate(year, month, dayOfMonth)
+            updateDateHeader(year, month, dayOfMonth)
         }
 
-        // If editing existing event, set the calendar date
-        args.eventDate?.let { dateString ->
-            try {
-                val date = LocalDateTime.parse(dateString)
-                binding.calendarView.date = date
-                    .atZone(ZoneId.systemDefault())
-                    .toInstant()
-                    .toEpochMilli()
-                viewModel.setSelectedDate(date.year, date.monthValue - 1, date.dayOfMonth)
-            } catch (e: Exception) {
-                // If parsing fails, use current date
-                val now = LocalDateTime.now()
-                viewModel.setSelectedDate(now.year, now.monthValue - 1, now.dayOfMonth)
-            }
+        binding.dateHeaderSection.setOnClickListener {
+            showMonthYearPickerDialog()
         }
+
+        // Set initial header
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = binding.calendarView.date
+        }
+        updateDateHeader(
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
     }
 
+    private fun updateDateHeader(year: Int, month: Int, dayOfMonth: Int) {
+        val calendar = Calendar.getInstance().apply {
+            set(year, month, dayOfMonth)
+        }
+
+        val dayOfWeek = calendar.getDisplayName(Calendar.DAY_OF_WEEK, Calendar.SHORT, Locale.getDefault())
+        val monthName = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault())
+
+        binding.yearText.text = year.toString()
+        binding.fullDateText.text = "$dayOfWeek, $monthName $dayOfMonth"
+    }
+
+    private fun showMonthYearPickerDialog() {
+        val dialogView = layoutInflater.inflate(R.layout.dialog_month_year_picker, null)
+        val yearPicker = dialogView.findViewById<NumberPicker>(R.id.yearPicker)
+        val monthPicker = dialogView.findViewById<NumberPicker>(R.id.monthPicker)
+
+        // Get current date from CalendarView
+        val calendar = Calendar.getInstance().apply {
+            timeInMillis = binding.calendarView.date
+        }
+
+        // Setup year picker
+        yearPicker.apply {
+            minValue = 1900
+            maxValue = LocalDateTime.now().year + 100
+            value = calendar.get(Calendar.YEAR)
+        }
+
+        // Setup month picker with names
+        monthPicker.apply {
+            minValue = 0
+            maxValue = 11
+            displayedValues = arrayOf(
+                "January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            )
+            value = calendar.get(Calendar.MONTH)
+        }
+
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Select Month and Year")
+            .setView(dialogView)
+            .setPositiveButton("OK") { _, _ ->
+                calendar.set(Calendar.YEAR, yearPicker.value)
+                calendar.set(Calendar.MONTH, monthPicker.value)
+                binding.calendarView.date = calendar.timeInMillis
+
+                updateDateHeader(
+                    yearPicker.value,
+                    monthPicker.value,
+                    calendar.get(Calendar.DAY_OF_MONTH)
+                )
+
+                viewModel.setSelectedDate(
+                    yearPicker.value,
+                    monthPicker.value,
+                    calendar.get(Calendar.DAY_OF_MONTH)
+                )
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+
+    // Rest of your existing code remains the same
     private fun setupInitialData() {
         if (args.eventId != -1) {
             viewModel.loadEvent(args.eventId)
@@ -64,7 +138,6 @@ class EditSingleImportantEventFragment : Fragment(R.layout.fragment_edit_single_
                 args.eventType?.let { eventTypeDropdown.setText(it) }
             }
         } else {
-            // For new events, initialize with current date
             val now = LocalDateTime.now()
             viewModel.setSelectedDate(now.year, now.monthValue - 1, now.dayOfMonth)
         }

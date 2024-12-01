@@ -6,4 +6,5 @@
     <dimen name="margin_normal">16dp</dimen>
     <dimen name="padding_normal">16dp</dimen>
     <dimen name="tab_min_width">100dp</dimen>
+    <dimen name="small_padding">4dp</dimen>
 </resources>
