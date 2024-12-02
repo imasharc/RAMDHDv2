@@ -11,12 +11,14 @@ import com.sharc.ramdhd.data.model.importantPeople.EventType
 import com.sharc.ramdhd.data.model.importantPeople.ImportantEvent
 import com.sharc.ramdhd.data.model.importantPeople.RecurrenceType
 import com.sharc.ramdhd.data.repository.ImportantPeopleRepository
+import com.sharc.ramdhd.notifications.EventNotificationManager
 import kotlinx.coroutines.launch
 import java.time.LocalDateTime
 
 class EditSingleImportantEventViewModel(application: Application) : AndroidViewModel(application) {
     private val TAG = "ImportantEventVM"
     private val repository: ImportantPeopleRepository
+    private val notificationManager = EventNotificationManager(application.applicationContext)
 
     private val _selectedDate = MutableLiveData<LocalDateTime>()
     val selectedDate: LiveData<LocalDateTime> = _selectedDate
@@ -27,9 +29,18 @@ class EditSingleImportantEventViewModel(application: Application) : AndroidViewM
     private val _event = MutableLiveData<ImportantEvent>()
     val event: LiveData<ImportantEvent> = _event
 
+    private val _notificationPermissionStatus = MutableLiveData<Boolean>()
+    val notificationPermissionStatus: LiveData<Boolean> = _notificationPermissionStatus
+
     init {
         val database = AppDatabase.getDatabase(application)
         repository = ImportantPeopleRepository(database.importantEventDao())
+        checkNotificationPermission()
+    }
+
+    private fun checkNotificationPermission() {
+        _notificationPermissionStatus.value = notificationManager.hasNotificationPermission()
+        Log.d(TAG, "Notification permission status: ${_notificationPermissionStatus.value}")
     }
 
     fun loadEvent(eventId: Int) {
@@ -39,6 +50,7 @@ class EditSingleImportantEventViewModel(application: Application) : AndroidViewM
                     repository.getEventById(eventId)?.let { event ->
                         _event.value = event
                         _selectedDate.value = event.eventDate
+                        Log.d(TAG, "Event loaded successfully: $event")
                     }
                 } catch (e: Exception) {
                     Log.e(TAG, "Error loading event", e)
@@ -83,12 +95,26 @@ class EditSingleImportantEventViewModel(application: Application) : AndroidViewM
                     description = description.trim()
                 )
 
+                // Save event to database
                 if (eventId == -1) {
                     repository.insert(event)
                     Log.d(TAG, "New event saved: $event")
                 } else {
                     repository.update(event)
                     Log.d(TAG, "Event updated: $event")
+                }
+
+                // Schedule notification if permission is granted
+                if (notificationManager.hasNotificationPermission()) {
+                    Log.d(TAG, "Scheduling notification for event: $event")
+                    try {
+                        notificationManager.scheduleNotification(event)
+                        Log.d(TAG, "Notification scheduled successfully")
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Error scheduling notification", e)
+                    }
+                } else {
+                    Log.d(TAG, "Cannot schedule notification - no permission")
                 }
 
                 _saveStatus.value = true
@@ -105,5 +131,9 @@ class EditSingleImportantEventViewModel(application: Application) : AndroidViewM
 
     fun isExistingEvent(eventId: Int): Boolean {
         return eventId != -1
+    }
+
+    fun refreshNotificationPermissionStatus() {
+        checkNotificationPermission()
     }
 }
