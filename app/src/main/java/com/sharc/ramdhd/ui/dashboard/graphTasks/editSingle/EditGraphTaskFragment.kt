@@ -104,7 +104,8 @@ class EditGraphTaskFragment : Fragment() {
             addStepField(index, stepText)
         }
 
-        if (steps.isNotEmpty()) {
+        // Add extra empty step if last step is not empty
+        if (steps.isNotEmpty() && steps.last().isNotEmpty()) {
             Log.d(TAG, "Adding extra empty step field at index ${steps.size}")
             addStepField(steps.size)
         }
@@ -190,21 +191,30 @@ class EditGraphTaskFragment : Fragment() {
             (event?.keyCode == android.view.KeyEvent.KEYCODE_ENTER &&
                     event.action == android.view.KeyEvent.ACTION_DOWN)) {
 
-            // Get the LinearLayout container for current step
+            // Get current step's text
             val currentStepContainer = stepsContainer.getChildAt(index) as? LinearLayout
-            // Get the EditText from the container
             val currentStep = currentStepContainer?.getChildAt(0) as? EditText
+            val currentText = currentStep?.text?.toString() ?: ""
 
-            if (currentStep?.text?.isNotEmpty() == true && index == stepsContainer.childCount - 1) {
-                Log.d(TAG, "Adding new step field after current")
-                addStepField(index + 1)
+            if (currentText.isNotEmpty()) {
+                // Insert new empty step at current position
+                viewModel.insertStep(index)
+                updateStepFields(viewModel.getSteps().value ?: emptyList())
+
+                // Focus the newly inserted step
+                post {
+                    val newStepContainer = stepsContainer.getChildAt(index) as? LinearLayout
+                    val newStepInput = newStepContainer?.getChildAt(0) as? EditText
+                    newStepInput?.requestFocus()
+                    newStepInput?.setSelection(0)
+                }
+            } else {
+                // If current step is empty, move to next step
+                val nextIndex = index + 1
+                val nextStepContainer = stepsContainer.getChildAt(nextIndex) as? LinearLayout
+                val nextStepInput = nextStepContainer?.getChildAt(0) as? EditText
+                nextStepInput?.requestFocus()
             }
-
-            val nextIndex = index + 1
-            // Get the next step's container and EditText
-            val nextStepContainer = stepsContainer.getChildAt(nextIndex) as? LinearLayout
-            val nextStepInput = nextStepContainer?.getChildAt(0) as? EditText
-            nextStepInput?.requestFocus()
             return true
         }
         return false

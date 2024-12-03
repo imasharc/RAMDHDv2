@@ -55,6 +55,29 @@ class EditGraphTaskViewModel(application: Application) : AndroidViewModel(applic
         }
     }
 
+    fun insertStep(index: Int) {
+        try {
+            Log.d(TAG, "Inserting empty step at index $index")
+
+            // Insert empty step at specified index
+            currentSteps.add(index, "")
+
+            // Update gratification indices after insertion point
+            val updatedGratificationIndices = gratificationStepIndices.map { oldIndex ->
+                if (oldIndex >= index) oldIndex + 1 else oldIndex
+            }.toMutableSet()
+            gratificationStepIndices.clear()
+            gratificationStepIndices.addAll(updatedGratificationIndices)
+
+            _steps.value = currentSteps.toMutableList()
+
+            Log.d(TAG, "Successfully inserted step, new size: ${currentSteps.size}")
+            Log.d(TAG, "Updated gratification indices: $gratificationStepIndices")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error inserting step: ${e.message}", e)
+        }
+    }
+
     fun updateStep(index: Int, text: String) {
         try {
             Log.d(TAG, "Updating step $index with text: $text")
