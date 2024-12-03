@@ -47,7 +47,6 @@ class EditGraphTaskViewModel(application: Application) : AndroidViewModel(applic
         }
         _steps.value = currentSteps
 
-        // Initialize gratification states from passed data
         gratificationStepIndices.clear()
         gratificationSteps?.forEach { index ->
             gratificationStepIndices.add(index)
@@ -59,10 +58,8 @@ class EditGraphTaskViewModel(application: Application) : AndroidViewModel(applic
         try {
             Log.d(TAG, "Inserting empty step at index $index")
 
-            // Insert empty step at specified index
             currentSteps.add(index, "")
 
-            // Update gratification indices after insertion point
             val updatedGratificationIndices = gratificationStepIndices.map { oldIndex ->
                 if (oldIndex >= index) oldIndex + 1 else oldIndex
             }.toMutableSet()
@@ -75,6 +72,41 @@ class EditGraphTaskViewModel(application: Application) : AndroidViewModel(applic
             Log.d(TAG, "Updated gratification indices: $gratificationStepIndices")
         } catch (e: Exception) {
             Log.e(TAG, "Error inserting step: ${e.message}", e)
+        }
+    }
+
+    fun canDeleteStep(index: Int): Boolean {
+        return currentSteps.size > MIN_STEPS && index < currentSteps.size
+    }
+
+    fun deleteStep(index: Int) {
+        try {
+            Log.d(TAG, "Deleting step at index $index")
+            if (!canDeleteStep(index)) {
+                Log.d(TAG, "Cannot delete step: minimum steps requirement or invalid index")
+                return
+            }
+
+            currentSteps.removeAt(index)
+
+            val updatedGratificationIndices = gratificationStepIndices.map { oldIndex ->
+                when {
+                    oldIndex == index -> -1 // Mark for removal
+                    oldIndex > index -> oldIndex - 1 // Shift down
+                    else -> oldIndex // Keep same
+                }
+            }.filter { it >= 0 }.toMutableSet()
+
+            gratificationStepIndices.clear()
+            gratificationStepIndices.addAll(updatedGratificationIndices)
+
+            // Create a new list to ensure the observer triggers
+            _steps.value = ArrayList(currentSteps)
+
+            Log.d(TAG, "Successfully deleted step, new size: ${currentSteps.size}")
+            Log.d(TAG, "Updated gratification indices: $gratificationStepIndices")
+        } catch (e: Exception) {
+            Log.e(TAG, "Error deleting step: ${e.message}", e)
         }
     }
 
@@ -115,13 +147,11 @@ class EditGraphTaskViewModel(application: Application) : AndroidViewModel(applic
         Log.d(TAG, "Saving graph task: $title")
 
         try {
-            // Find the last index with non-empty text
             var lastWrittenIndex = currentSteps.size - 1
             while (lastWrittenIndex >= 0 && currentSteps[lastWrittenIndex].isEmpty()) {
                 lastWrittenIndex--
             }
 
-            // Keep all steps up to the last written one
             val stepsToSave = currentSteps.take(lastWrittenIndex + 1).mapIndexed { index, stepText ->
                 GraphStep(
                     taskId = taskId,
@@ -132,7 +162,6 @@ class EditGraphTaskViewModel(application: Application) : AndroidViewModel(applic
                 )
             }
 
-            // Validate minimum steps requirement
             if (stepsToSave.size < MIN_STEPS) {
                 throw IllegalStateException("At least $MIN_STEPS steps are required")
             }

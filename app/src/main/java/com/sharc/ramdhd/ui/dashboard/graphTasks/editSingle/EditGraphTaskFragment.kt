@@ -58,12 +58,10 @@ class EditGraphTaskFragment : Fragment() {
         titleInput = view.findViewById(R.id.titleInput)
         descriptionInput = view.findViewById(R.id.descriptionInput)
 
-        // Set initial values from arguments
         titleInput.setText(args.taskTitle)
         descriptionInput.setText(args.taskDescription)
         Log.d(TAG, "Initial values set - Title: ${args.taskTitle}, Description: ${args.taskDescription}")
 
-        // Setup save button
         view.findViewById<View>(R.id.saveButton).setOnClickListener {
             saveGraphTask()
         }
@@ -104,7 +102,6 @@ class EditGraphTaskFragment : Fragment() {
             addStepField(index, stepText)
         }
 
-        // Add extra empty step if last step is not empty
         if (steps.isNotEmpty() && steps.last().isNotEmpty()) {
             Log.d(TAG, "Adding extra empty step field at index ${steps.size}")
             addStepField(steps.size)
@@ -115,7 +112,6 @@ class EditGraphTaskFragment : Fragment() {
         try {
             Log.d(TAG, "Adding step field at index $index with text: $initialText")
 
-            // Create horizontal container for step
             val stepContainer = LinearLayout(requireContext()).apply {
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.MATCH_PARENT,
@@ -126,12 +122,11 @@ class EditGraphTaskFragment : Fragment() {
                 orientation = LinearLayout.HORIZONTAL
             }
 
-            // Create step input field
             val stepInput = EditText(requireContext()).apply {
                 layoutParams = LinearLayout.LayoutParams(
-                    0,  // 0 width with weight will make it fill remaining space
+                    0,
                     LinearLayout.LayoutParams.WRAP_CONTENT,
-                    1f  // weight of 1
+                    1f
                 )
                 hint = "Step ${index + 1}"
                 inputType = android.text.InputType.TYPE_CLASS_TEXT
@@ -150,6 +145,31 @@ class EditGraphTaskFragment : Fragment() {
                     handleEditorAction(actionId, event, index)
                 }
 
+                setOnKeyListener { _, keyCode, event ->
+                    if (event.action == android.view.KeyEvent.ACTION_DOWN &&
+                        keyCode == android.view.KeyEvent.KEYCODE_DEL &&
+                        text.isEmpty() &&
+                        index > 0
+                    ) {
+                        val previousStepContainer = stepsContainer.getChildAt(index - 1) as? LinearLayout
+                        val previousStepInput = previousStepContainer?.getChildAt(0) as? EditText
+                        val previousTextLength = previousStepInput?.length() ?: 0
+
+                        viewModel.deleteStep(index)
+                        updateStepFields(viewModel.getSteps().value ?: emptyList())
+
+                        post {
+                            previousStepInput?.apply {
+                                requestFocus()
+                                setSelection(previousTextLength)
+                            }
+                        }
+                        true
+                    } else {
+                        false
+                    }
+                }
+
                 setOnFocusChangeListener { _, hasFocus ->
                     handleFocusChange(hasFocus, index)
                 }
@@ -159,7 +179,6 @@ class EditGraphTaskFragment : Fragment() {
                 }
             }
 
-            // Create gratification checkbox
             val gratificationCheckbox = CheckBox(requireContext()).apply {
                 layoutParams = LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -191,22 +210,39 @@ class EditGraphTaskFragment : Fragment() {
             (event?.keyCode == android.view.KeyEvent.KEYCODE_ENTER &&
                     event.action == android.view.KeyEvent.ACTION_DOWN)) {
 
-            // Get current step's text
             val currentStepContainer = stepsContainer.getChildAt(index) as? LinearLayout
             val currentStep = currentStepContainer?.getChildAt(0) as? EditText
             val currentText = currentStep?.text?.toString() ?: ""
+            val cursorPosition = currentStep?.selectionStart ?: 0
 
             if (currentText.isNotEmpty()) {
-                // Insert new empty step at current position
-                viewModel.insertStep(index)
-                updateStepFields(viewModel.getSteps().value ?: emptyList())
+                // If cursor is at the end, insert after current step
+                if (cursorPosition == currentText.length) {
+                    viewModel.insertStep(index + 1)
+                    updateStepFields(viewModel.getSteps().value ?: emptyList())
 
-                // Focus the newly inserted step
-                post {
-                    val newStepContainer = stepsContainer.getChildAt(index) as? LinearLayout
-                    val newStepInput = newStepContainer?.getChildAt(0) as? EditText
-                    newStepInput?.requestFocus()
-                    newStepInput?.setSelection(0)
+                    post {
+                        val newStepContainer = stepsContainer.getChildAt(index + 1) as? LinearLayout
+                        val newStepInput = newStepContainer?.getChildAt(0) as? EditText
+                        newStepInput?.apply {
+                            requestFocus()
+                            setSelection(0)
+                        }
+                    }
+                }
+                // If cursor is before the end, insert before current step
+                else {
+                    viewModel.insertStep(index)
+                    updateStepFields(viewModel.getSteps().value ?: emptyList())
+
+                    post {
+                        val newStepContainer = stepsContainer.getChildAt(index) as? LinearLayout
+                        val newStepInput = newStepContainer?.getChildAt(0) as? EditText
+                        newStepInput?.apply {
+                            requestFocus()
+                            setSelection(0)
+                        }
+                    }
                 }
             } else {
                 // If current step is empty, move to next step
@@ -218,6 +254,32 @@ class EditGraphTaskFragment : Fragment() {
             return true
         }
         return false
+    }
+
+    private fun handleStepDeletion(index: Int) {
+        Log.d(TAG, "Handling step deletion at index $index")
+        try {
+            if (index >= MIN_STEPS && viewModel.canDeleteStep(index)) {
+                // Store the previous step's text length before deletion
+                val previousStepContainer = stepsContainer.getChildAt(index - 1) as? LinearLayout
+                val previousStepInput = previousStepContainer?.getChildAt(0) as? EditText
+                val previousTextLength = previousStepInput?.length() ?: 0
+
+                viewModel.deleteStep(index)
+
+                // Focus will be handled by the observer update
+                post {
+                    val newPreviousContainer = stepsContainer.getChildAt(index - 1) as? LinearLayout
+                    val newPreviousInput = newPreviousContainer?.getChildAt(0) as? EditText
+                    newPreviousInput?.apply {
+                        requestFocus()
+                        setSelection(previousTextLength)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Error during step deletion: ${e.message}", e)
+        }
     }
 
     private fun handleFocusChange(hasFocus: Boolean, index: Int) {
