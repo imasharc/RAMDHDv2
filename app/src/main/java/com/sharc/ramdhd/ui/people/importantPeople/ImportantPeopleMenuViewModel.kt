@@ -17,6 +17,7 @@ import java.time.temporal.ChronoUnit
 
 class ImportantPeopleMenuViewModel(application: Application) : AndroidViewModel(application) {
     private val repository: ImportantPeopleRepository
+
     private val _events = MutableLiveData<List<EventListItem>>()
     val events: LiveData<List<EventListItem>> = _events
 
@@ -25,6 +26,9 @@ class ImportantPeopleMenuViewModel(application: Application) : AndroidViewModel(
 
     private val _currentFilter = MutableLiveData(EventFilterType.ALL)
     val currentFilter: LiveData<EventFilterType> = _currentFilter
+
+    private val _deleteResult = MutableLiveData<Boolean>()
+    val deleteResult: LiveData<Boolean> = _deleteResult
 
     init {
         val database = AppDatabase.getDatabase(application)
@@ -53,7 +57,6 @@ class ImportantPeopleMenuViewModel(application: Application) : AndroidViewModel(
             else -> events.sortedBy { it.eventDate }
         }
 
-        // Insert delimiters between different groups
         return sortedEvents.fold(mutableListOf()) { acc, event ->
             if (acc.isEmpty() || shouldAddDelimiter(acc.last(), event)) {
                 acc.add(EventListItem.HeaderItem(getHeaderText(event)))
@@ -134,7 +137,17 @@ class ImportantPeopleMenuViewModel(application: Application) : AndroidViewModel(
 
     fun deleteEvents(events: List<ImportantEvent>) {
         viewModelScope.launch {
-            repository.deleteEvents(events)
+            try {
+                repository.deleteEvents(events)
+                _deleteResult.value = true
+                loadEvents() // Reload events after successful deletion
+            } catch (e: Exception) {
+                _deleteResult.value = false
+            }
         }
+    }
+
+    private fun String.capitalize(): String {
+        return this.lowercase().replaceFirstChar { it.uppercase() }
     }
 }

@@ -18,6 +18,7 @@ class ImportantEventAdapter : ListAdapter<EventListItem, RecyclerView.ViewHolder
     private var onItemClickListener: ((ImportantEvent) -> Unit)? = null
     private var onItemLongClickListener: ((ImportantEvent) -> Unit)? = null
     private var onSelectionChanged: ((Int) -> Unit)? = null
+    private var onSelectionStarted: (() -> Unit)? = null
 
     companion object {
         private const val TYPE_HEADER = 0
@@ -43,10 +44,15 @@ class ImportantEventAdapter : ListAdapter<EventListItem, RecyclerView.ViewHolder
         onSelectionChanged = listener
     }
 
+    fun setOnSelectionStartedListener(listener: () -> Unit) {
+        onSelectionStarted = listener
+    }
+
     fun toggleSelectionMode() {
         selectionMode = !selectionMode
         if (!selectionMode) {
             selectedEvents.clear()
+            onSelectionChanged?.invoke(0)
         }
         notifyDataSetChanged()
     }
@@ -76,6 +82,15 @@ class ImportantEventAdapter : ListAdapter<EventListItem, RecyclerView.ViewHolder
     fun isInSelectionMode() = selectionMode
 
     fun getSelectedEvents(): Set<ImportantEvent> = selectedEvents.toSet()
+
+    fun exitSelectionMode() {
+        if (selectionMode) {
+            selectionMode = false
+            selectedEvents.clear()
+            notifyDataSetChanged()
+            onSelectionChanged?.invoke(0)
+        }
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
@@ -111,13 +126,7 @@ class ImportantEventAdapter : ListAdapter<EventListItem, RecyclerView.ViewHolder
 
                 holder.itemView.setOnClickListener {
                     if (selectionMode) {
-                        if (selectedEvents.contains(item.event)) {
-                            selectedEvents.remove(item.event)
-                        } else {
-                            selectedEvents.add(item.event)
-                        }
-                        notifyItemChanged(position)
-                        onSelectionChanged?.invoke(selectedEvents.size)
+                        toggleEventSelection(item.event, position)
                     } else {
                         onItemClickListener?.invoke(item.event)
                     }
@@ -125,16 +134,31 @@ class ImportantEventAdapter : ListAdapter<EventListItem, RecyclerView.ViewHolder
 
                 holder.itemView.setOnLongClickListener {
                     if (!selectionMode) {
-                        onItemLongClickListener?.invoke(item.event)
-                        toggleSelectionMode()
-                        selectedEvents.add(item.event)
-                        notifyDataSetChanged()
-                        onSelectionChanged?.invoke(selectedEvents.size)
+                        startSelectionMode(item.event, position)
                     }
                     true
                 }
             }
         }
+    }
+
+    private fun toggleEventSelection(event: ImportantEvent, position: Int) {
+        if (selectedEvents.contains(event)) {
+            selectedEvents.remove(event)
+        } else {
+            selectedEvents.add(event)
+        }
+        notifyItemChanged(position)
+        onSelectionChanged?.invoke(selectedEvents.size)
+    }
+
+    private fun startSelectionMode(event: ImportantEvent, position: Int) {
+        selectionMode = true
+        selectedEvents.clear()
+        selectedEvents.add(event)
+        notifyDataSetChanged()
+        onSelectionStarted?.invoke()
+        onSelectionChanged?.invoke(1)
     }
 
     class HeaderViewHolder(private val binding: ItemEventHeaderBinding) :
