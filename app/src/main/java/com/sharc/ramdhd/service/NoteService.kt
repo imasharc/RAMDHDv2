@@ -48,7 +48,9 @@ class NoteService : Service() {
             .setContentTitle("You still have some notes remaining")
             .setSmallIcon(R.drawable.ic_notification)
             .setOngoing(true)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setAutoCancel(false)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setSilent(true)
             .build()
@@ -102,38 +104,47 @@ class NoteService : Service() {
     }
 
     private fun showNoteNotification(note: Note) {
-        if (!wakeLock.isHeld) {
-            wakeLock.acquire(10*60*1000L)
-        }
-
-        val notificationIntent = packageManager
-            .getLaunchIntentForPackage(packageName)
-            ?.apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-                putExtra("note_id", note.id)
+        try {
+            // Only acquire if not held
+            if (!wakeLock.isHeld) {
+                wakeLock.acquire(5000L)
             }
 
-        val pendingIntent = PendingIntent.getActivity(
-            this,
-            note.id,
-            notificationIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+            val notificationIntent = packageManager
+                .getLaunchIntentForPackage(packageName)
+                ?.apply {
+                    flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    putExtra("note_id", note.id)
+                }
 
-        val notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle(note.title)
-            .setContentText(note.description)
-            .setSmallIcon(R.drawable.ic_notification)
-            .setOngoing(true)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setContentIntent(pendingIntent)
-            .setSilent(true)
-            .build()
+            val pendingIntent = PendingIntent.getActivity(
+                this,
+                note.id,
+                notificationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
 
-        // Instead of using startForeground, use notify
-        notificationManager.notify(note.id, notification)
-        activeNotes.add(note.id)
+            val notification = NotificationCompat.Builder(this, channelId)
+                .setContentTitle(note.title)
+                .setContentText(note.description)
+                .setSmallIcon(R.drawable.ic_notification)
+                .setOngoing(true)
+                .setAutoCancel(false)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setContentIntent(pendingIntent)
+                .setSilent(true)
+                .build()
+
+            notificationManager.notify(note.id, notification)
+            activeNotes.add(note.id)
+        } finally {
+            // Always release in finally block if held
+            if (wakeLock.isHeld) {
+                wakeLock.release()
+            }
+        }
     }
 
     private fun stopNotification(noteId: Int) {
