@@ -5,19 +5,17 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fillViewport="true"
         android:clipToPadding="false"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:orientation="vertical"
             android:padding="16dp">
-
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/textViewTitle"
                 android:layout_width="match_parent"
@@ -26,7 +24,6 @@
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
                 tools:text="Graph Task Title"/>
-
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/textViewDescription"
                 android:layout_width="match_parent"
@@ -35,24 +32,21 @@
                 android:textAppearance="?attr/textAppearanceBody1"
                 android:textColor="@android:color/darker_gray"
                 tools:text="Graph task description"/>
-
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewSteps"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
                 android:layout_marginTop="16dp"
                 android:clipToPadding="false"
                 android:paddingBottom="88dp"
                 android:scrollbars="vertical"
                 android:fadeScrollbars="true"
-                android:nestedScrollingEnabled="false"
+                android:nestedScrollingEnabled="true"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:listitem="@layout/item_graph_step"/>
-
         </LinearLayout>
-
     </androidx.core.widget.NestedScrollView>
-
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabEdit"
         android:layout_width="wrap_content"
@@ -68,11 +62,9 @@
         app:tint="#2196F3"
         app:elevation="6dp"
         app:rippleColor="@null" />
-
     <Space
         android:id="@+id/saveButtonBarrier"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"/>
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

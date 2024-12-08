@@ -67,6 +67,8 @@ class ViewSingleGraphTaskFragment : Fragment(R.layout.fragment_view_single_graph
             adapter = stepAdapter
             layoutManager = LinearLayoutManager(requireContext())
             setHasFixedSize(true)
+            // Add this to verify layout parameters
+            Log.d(TAG, "RecyclerView height mode: ${layoutParams.height}")
         }
 
         binding.fabEdit.setOnClickListener {
@@ -155,17 +157,20 @@ class ViewSingleGraphTaskFragment : Fragment(R.layout.fragment_view_single_graph
             graphTaskWithSteps?.let { task ->
                 Log.d(TAG, "Observing graph task: ${task.task.title}")
                 Log.d(TAG, "Steps count: ${task.steps.size}")
+                // Add detailed step logging
+                task.steps.forEachIndexed { index, step ->
+                    Log.d(TAG, "Step $index: ${step.description}, Order: ${step.orderNumber}")
+                }
 
                 binding.apply {
                     textViewTitle.text = task.task.title
                     textViewDescription.text = task.task.description
-                    stepAdapter.submitList(task.steps.sortedBy { it.orderNumber })
-                }
 
-                // Check if all steps are completed when loading task
-                val allCompleted = task.steps.all { it.isCompleted }
-                if (allCompleted && !completionDialogShowing && !isResetting) {
-                    showCompletionDialog()
+                    // Add logging before submitting to adapter
+                    Log.d(TAG, "Submitting ${task.steps.size} steps to adapter")
+                    val sortedSteps = task.steps.sortedBy { it.orderNumber }
+                    Log.d(TAG, "Sorted steps count: ${sortedSteps.size}")
+                    stepAdapter.submitList(sortedSteps)
                 }
             } ?: run {
                 Log.e(TAG, "No task data available")

@@ -1,4 +1,5 @@
 package com.sharc.ramdhd.ui.dashboard.graphTasks.viewSingle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -130,6 +131,10 @@ class ViewGraphStepAdapter(
     }
 
     override fun submitList(list: List<GraphStep>?) {
+        Log.d("ViewGraphStepAdapter", "Submitting list of size: ${list?.size}")
+        list?.forEachIndexed { index, step ->
+            Log.d("ViewGraphStepAdapter", "Step $index: ${step.description}")
+        }
         super.submitList(list?.map { it.copy() })
     }
 }
