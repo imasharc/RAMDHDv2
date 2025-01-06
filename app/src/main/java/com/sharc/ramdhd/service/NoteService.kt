@@ -1,11 +1,13 @@
 package com.sharc.ramdhd.service
 
+import android.app.Notification  // Added this import
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ServiceInfo
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
@@ -23,7 +25,7 @@ class NoteService : Service() {
     private val notificationManager by lazy {
         getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
-    private val activeNotes = mutableSetOf<Int>()  // Track active note IDs
+    private val activeNotes = mutableSetOf<Int>()
 
     inner class NoteBinder : Binder() {
         fun getService(): NoteService = this@NoteService
@@ -39,21 +41,35 @@ class NoteService : Service() {
             "NoteService::WakeLock"
         )
 
-        // Start the service with an empty notification to keep it running
-        startForeground(FOREGROUND_SERVICE_ID, createBaseNotification())
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            startForeground(
+                FOREGROUND_SERVICE_ID,
+                createBaseNotification(),
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_SHORT_SERVICE
+            )
+        } else {
+            startForeground(FOREGROUND_SERVICE_ID, createBaseNotification())
+        }
     }
 
-    private fun createBaseNotification(): android.app.Notification {
+    private fun createBaseNotification(): Notification {
         return NotificationCompat.Builder(this, channelId)
             .setContentTitle("You still have some notes remaining")
             .setSmallIcon(R.drawable.ic_notification)
             .setOngoing(true)
             .setAutoCancel(false)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+            .setPriority(NotificationCompat.PRIORITY_MAX)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setSilent(true)
-            .build()
+            .setOnlyAlertOnce(true)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+            .setTimeoutAfter(0)
+            .build().apply {
+                flags = flags or Notification.FLAG_NO_CLEAR or
+                        Notification.FLAG_ONGOING_EVENT or
+                        Notification.FLAG_FOREGROUND_SERVICE
+            }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -89,15 +105,22 @@ class NoteService : Service() {
 
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            // Delete existing channel to update settings
+            notificationManager.deleteNotificationChannel(channelId)
+
             val channel = NotificationChannel(
                 channelId,
                 "Active Notes",
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 setShowBadge(true)
                 setSound(null, null)
-                enableLights(false)
+                enableLights(true)
                 enableVibration(false)
+                setBypassDnd(true)
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                setAllowBubbles(true)
+                importance = NotificationManager.IMPORTANCE_HIGH
             }
             notificationManager.createNotificationChannel(channel)
         }
@@ -105,7 +128,6 @@ class NoteService : Service() {
 
     private fun showNoteNotification(note: Note) {
         try {
-            // Only acquire if not held
             if (!wakeLock.isHeld) {
                 wakeLock.acquire(5000L)
             }
@@ -124,23 +146,41 @@ class NoteService : Service() {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
 
+            val deleteIntent = PendingIntent.getBroadcast(
+                this,
+                note.id,
+                Intent(this, NotificationDismissedReceiver::class.java).apply {
+                    putExtra("note_id", note.id)
+                    putExtra("note_title", note.title)
+                    putExtra("note_description", note.description)
+                },
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+
             val notification = NotificationCompat.Builder(this, channelId)
                 .setContentTitle(note.title)
                 .setContentText(note.description)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setOngoing(true)
                 .setAutoCancel(false)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                .setPriority(NotificationCompat.PRIORITY_MAX)
+                .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .setContentIntent(pendingIntent)
                 .setSilent(true)
-                .build()
+                .setOnlyAlertOnce(true)
+                .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
+                .setTimeoutAfter(0)
+                .setDeleteIntent(deleteIntent)
+                .build().apply {
+                    flags = flags or Notification.FLAG_NO_CLEAR or
+                            Notification.FLAG_ONGOING_EVENT or
+                            Notification.FLAG_FOREGROUND_SERVICE
+                }
 
             notificationManager.notify(note.id, notification)
             activeNotes.add(note.id)
         } finally {
-            // Always release in finally block if held
             if (wakeLock.isHeld) {
                 wakeLock.release()
             }
@@ -151,7 +191,6 @@ class NoteService : Service() {
         notificationManager.cancel(noteId)
         activeNotes.remove(noteId)
 
-        // If no more active notes, stop the service
         if (activeNotes.isEmpty()) {
             if (wakeLock.isHeld) {
                 wakeLock.release()
@@ -170,6 +209,6 @@ class NoteService : Service() {
 
     companion object {
         const val ACTION_STOP_NOTE = "com.sharc.ramdhd.action.STOP_NOTE"
-        private const val FOREGROUND_SERVICE_ID = 99999  // Unique ID for the service notification
+        private const val FOREGROUND_SERVICE_ID = 99999
     }
 }

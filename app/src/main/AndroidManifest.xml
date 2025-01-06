@@ -45,6 +45,10 @@
         <service
             android:name=".service.NoteService"
             android:enabled="true"
+            android:foregroundServiceType="shortService"
+            android:exported="false" />
+
+        <receiver android:name=".service.NotificationDismissedReceiver"
             android:exported="false" />
 
     </application>
